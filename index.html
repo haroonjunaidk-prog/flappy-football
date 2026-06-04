@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Football: Top Bins Edition</title>
+    <style>
+        :root {
+            --bg-dark: #090d16;
+            --accent-green: #10b981;
+            --neon-blue: #06b6d4;
+            --gold: #f59e0b;
+            --text-light: #f8fafc;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #1e1b4b 0%, #090d16 100%);
+        }
+
+        .game-container {
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+
+        h1 span {
+            color: var(--accent-green);
+        }
+
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            width: 480px;
+            margin-bottom: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: 1px solid #1e293b;
+            backdrop-filter: blur(4px);
+        }
+
+        .score span { color: var(--accent-green); }
+        .multiplier span { color: var(--neon-blue); }
+        .high-score span { color: var(--gold); }
+
+        canvas {
+            background: linear-gradient(to bottom, #1e3a8a, #3b82f6);
+            border: 4px solid #1e293b;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            display: block;
+            cursor: pointer;
+        }
+
+        .controls-hint {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #94a3b8;
+            background: rgba(0,0,0,0.4);
+            padding: 8px 18px;
+            border-radius: 20px;
+            max-width: 450px;
+            line-height: 1.4;
+            border: 1px solid #1e293b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>STRIKER: <span>TOP BINS</span></h1>
+        
+        <div class="scoreboard">
+            <div class="score">Goals: <span id="current-score">0</span></div>
+            <div class="multiplier">Multiplier: <span id="score-mult">x1</span></div>
+            <div class="high-score">Record: <span id="high-score">0</span></div>
+        </div>
+
+        <canvas id="gameCanvas" width="480" height="520"></canvas>
+
+        <div class="controls-hint">
+            ⚽ **TAP SPACE** to juggle up. <br>
+            ↔️ **HOLD LEFT/RIGHT ARROWS** mid-air to bend/curve the ball away from the goalie!
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let highScore = 0;
+        try { highScore = localStorage.getItem('ftbHighScore') || 0; } catch (e) {}
+        document.getElementById('high-score').innerText = highScore;
+
+        let score = 0;
+        let comboMultiplier = 1;
+        let gameStarted = false;
+        let gameOver = false;
+
+        // Football Physics
+        const ball = {
+            x: 100,
+            y: 220,
+            radius: 13,
+            gravity: 0.36,
+            lift: -6.8,
+            velocity: 0,
+            rotation: 0,
+            curveForce: 0
+        };
+
+        // Obstacles & Targets
+        let obstacles = [];
+        let targets = [];
+        const obstacleWidth = 45;
+        const obstacleGap = 170; 
+        let obstacleSpeed = 2.6;
+        let spawnTimer = 0;
+
+        // Input Trackers
+        let keys = {};
+        window.addEventListener('keydown', e => {
+            keys[e.key] = true;
+            if (e.key === ' ' || e.code === 'Space') {
+                e.preventDefault();
+                juggleBall();
+            }
+        });
+        window.addEventListener('keyup', e => { keys[e.key] = false; });
+        canvas.addEventListener('mousedown', juggleBall);
+
+        function juggleBall() {
+            if (gameOver) { resetGame(); return; }
+            if (!gameStarted) gameStarted = true;
+            ball.velocity = ball.lift;
+        }
+
+        function spawnCustomPost() {
+            const pad = 70;
+            const openSpace = canvas.height - obstacleGap - pad - 50;
+            const topHeight = Math.floor(Math.random() * openSpace) + pad;
+
+            // Create a Goalkeeper attached directly to this specific obstacle column
+            const goalieHeight = 50;
+            const goalieMinY = topHeight + 5;
+            const goalieMaxY = topHeight + obstacleGap - goalieHeight - 5;
+
+            obstacles.push({
+                x: canvas.width,
+                top: topHeight,
+                passed: false,
+                // Inner Goalkeeper properties
+                goalieY: topHeight + (obstacleGap / 2) - (goalieHeight / 2),
+                goalieDir: Math.random() > 0.5 ? 1 : -1,
+                goalieSpeed: 1.8,
+                goalieHeight: goalieHeight,
+                goalieWidth: 16,
+                minY: goalieMinY,
+                maxY: goalieMaxY
+            });
+
+            // Target ring
+            targets.push({
+                x: canvas.width + obstacleWidth / 2,
+                y: topHeight + (obstacleGap / 2) + (Math.random() * 40 - 20),
+                radius: 18,
+                hit: false
+            });
+        }
+
+        function resetGame() {
+            ball.y = 220;
+            ball.x = 100;
+            ball.velocity = 0;
+            ball.curveForce = 0;
+            ball.rotation = 0;
+            obstacles = [];
+            targets = [];
+            score = 0;
+            comboMultiplier = 1;
+            obstacleSpeed = 2.6;
+            document.getElementById('current-score').innerText = score;
+            document.getElementById('score-mult').innerText = "x1";
+            gameOver = false;
+            gameStarted = false;
+            spawnTimer = 0;
+        }
+
+        // --- DRAWING FUNCTIONS ---
+        function drawFootball() {
+            ctx.save();
+            ctx.translate(ball.x, ball.y);
+            ctx.rotate(ball.rotation);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(0, 0, ball.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#020617';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.arc(0, 0, 4, 0, Math.PI*2);
+            ctx.fill();
+
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1.5;
+            for(let i=0; i<5; i++) {
+                let a = (Math.PI*2/5) * i;
+                ctx.beginPath();
+                ctx.moveTo(0,0);
+                ctx.lineTo(Math.cos(a)*ball.radius, Math.sin(a)*ball.radius);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        function drawStadiumObstacles() {
+            obstacles.forEach(obs => {
+                let gradient = ctx.createLinearGradient(obs.x, 0, obs.x + obstacleWidth, 0);
+                gradient.addColorStop(0, '#e2e8f0');
+                gradient.addColorStop(0.4, '#ffffff');
+                gradient.addColorStop(1, '#94a3b8');
+
+                // Top Goalpost
+                ctx.fillStyle = gradient;
+                ctx.fillRect(obs.x, 0, obstacleWidth, obs.top);
+                ctx.strokeStyle = '#1e293b';
+                ctx.strokeRect(obs.x, -5, obstacleWidth, obs.top + 5);
+
+                // Bottom Goalpost
+                let bottomY = obs.top + obstacleGap;
+                let bottomHeight = canvas.height - bottomY;
+                ctx.fillRect(obs.x, bottomY, obstacleWidth, bottomHeight);
+                ctx.strokeRect(obs.x, bottomY, obstacleWidth, bottomHeight + 5);
+
+                // Draw the Goalkeeper right inside the net gap
+                ctx.save();
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = '#ef4444';
+                
+                // GK Jersey body
+                ctx.fillStyle = '#ef4444';
+                ctx.fillRect(obs.x + 12, obs.goalieY, obs.goalieWidth, obs.goalieHeight);
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(obs.x + 12, obs.goalieY, obs.goalieWidth, obs.goalieHeight);
+
+                // GK Yellow Gloves
+                ctx.fillStyle = '#eab308';
+                ctx.fillRect(obs.x + 6, obs.goalieY, 7, 10); // Top hand
+                ctx.fillRect(obs.x + 6, obs.goalieY + obs.goalieHeight - 10, 7, 10); // Bottom hand
+                ctx.restore();
+            });
+
+            // Targets
+            targets.forEach(t => {
+                if(t.hit) return;
+                ctx.save();
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = '#06b6d4';
+                ctx.strokeStyle = '#06b6d4';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(t.x, t.y, t.radius, 0, Math.PI*2);
+                ctx.stroke();
+                ctx.restore();
+            });
+        }
+
+        function drawPitchGrass() {
+            for(let i=0; i<canvas.width; i+=40) {
+                ctx.fillStyle = (i / 40 % 2 === 0) ? '#15803d' : '#166534';
+                ctx.fillRect(i, canvas.height - 40, 40, 40);
+            }
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.fillRect(0, canvas.height - 40, canvas.width, 3);
+        }
+
+        function drawUIPanels() {
+            if (!gameStarted && !gameOver) {
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+                ctx.fillRect(50, 150, canvas.width - 100, 180);
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(50, 150, canvas.width - 100, 180);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '900 20px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('ENTER THE ARENA', canvas.width / 2, 195);
+                
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '13px sans-serif';
+                ctx.fillText('Tap Spacebar / Click to jump up', canvas.width / 2, 230);
+                ctx.fillText('Hold Left / Right Arrows to curve ball', canvas.width / 2, 255);
+
+                ctx.fillStyle = '#fbbf24';
+                ctx.font = 'bold 13px sans-serif';
+                ctx.fillText('BEND IT PAST THE GOALIE\'S GLOVES!', canvas.width / 2, 295);
+            }
+
+            if (gameOver) {
+                ctx.fillStyle = 'rgba(9, 13, 22, 0.9)';
+                ctx.fillRect(50, 160, canvas.width - 100, 160);
+                ctx.strokeStyle = '#ef4444';
+                ctx.strokeRect(50, 160, canvas.width - 100, 160);
+                
+                ctx.fillStyle = '#ef4444';
+                ctx.font = '900 24px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('SAVED! MATCH OVER', canvas.width / 2, 205);
+
+                ctx.font = 'bold 15px sans-serif';
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(`Final Goals Scored: ${score}`, canvas.width / 2, 245);
+                ctx.fillStyle = '#fbbf24';
+                ctx.fillText('Tap Screen / Space to retry', canvas.width / 2, 285);
+            }
+        }
+
+        // --- GAME LOOP ---
+        function executionLoop() {
+            ctx.fillStyle = '#1e3a8a';
+            ctx.fillRect(0,0, canvas.width, canvas.height);
+
+            if (gameStarted && !gameOver) {
+                ball.velocity += ball.gravity;
+                ball.y += ball.velocity;
+                ball.rotation += 0.05 + (ball.curveForce * 0.02);
+
+                // Curve logic
+                if(keys['ArrowLeft'] || keys['a']) {
+                    ball.curveForce = -1.8;
+                    ball.x += ball.curveForce;
+                } else if(keys['ArrowRight'] || keys['d']) {
+                    ball.curveForce = 1.8;
+                    ball.x += ball.curveForce;
+                } else {
+                    ball.curveForce *= 0.95;
+                    if(ball.x > 100) ball.x -= 0.6;
+                    if(ball.x < 100) ball.x += 0.6;
+                }
+
+                ball.x = Math.max(40, Math.min(canvas.width - 120, ball.x));
+
+                spawnTimer++;
+                if (spawnTimer >= 105) {
+                    spawnCustomPost();
+                    spawnTimer = 0;
+                }
+
+                // Process obstacles and active goalies
+                for (let i = obstacles.length - 1; i >= 0; i--) {
+                    let obs = obstacles[i];
+                    obs.x -= obstacleSpeed;
+
+                    // Move goalie within his limits inside the gap
+                    obs.goalieY += obs.goalieSpeed * obs.goalieDir;
+                    if (obs.goalieY < obs.minY || obs.goalieY > obs.maxY) {
+                        obs.goalieDir *= -1;
+                    }
+
+                    // Score check
+                    if (!obs.passed && obs.x + obstacleWidth < ball.x) {
+                        score += 1 * comboMultiplier;
+                        document.getElementById('current-score').innerText = score;
+                        obs.passed = true;
+
+                        if(score % 3 === 0) obstacleSpeed += 0.2;
+
+                        if (score > highScore) {
+                            highScore = score;
+                            document.getElementById('high-score').innerText = highScore;
+                            try { localStorage.setItem('ftbHighScore', highScore); } catch(e){}
+                        }
+                    }
+
+                    // Post Collision
+                    if (ball.x + ball.radius - 2 > obs.x && ball.x - ball.radius + 2 < obs.x + obstacleWidth) {
+                        if (ball.y - ball.radius + 2 < obs.top || ball.y + ball.radius - 2 > obs.top + obstacleGap) {
+                            gameOver = true;
+                        }
+                    }
+
+                    // Goalkeeper Collision (The Goalie blocks you!)
+                    if (ball.x + ball.radius - 2 > obs.x + 6 && ball.x - ball.radius + 2 < obs.x + 12 + obs.goalieWidth) {
+                        if (ball.y + ball.radius - 2 > obs.goalieY && ball.y - ball.radius + 2 < obs.goalieY + obs.goalieHeight) {
+                            gameOver = true;
+                        }
+                    }
+
+                    if (obs.x + obstacleWidth < 0) obstacles.splice(i, 1);
+                }
+
+                // Targets collision
+                for (let i = targets.length - 1; i >= 0; i--) {
+                    let t = targets[i];
+                    t.x -= obstacleSpeed;
+
+                    let dist = Math.hypot(ball.x - t.x, ball.y - t.y);
+                    if(!t.hit && dist < ball.radius + t.radius) {
+                        t.hit = true;
+                        comboMultiplier = 2;
+                        document.getElementById('score-mult').innerText = "x2 (HOT!)";
+                        document.getElementById('score-mult').style.color = "#06b6d4";
+                        
+                        setTimeout(() => {
+                            comboMultiplier = 1;
+                            document.getElementById('score-mult').innerText = "x1";
+                            document.getElementById('score-mult').style.color = "";
+                        }, 3500);
+                    }
+
+                    if(t.x + 30 < 0) targets.splice(i, 1);
+                }
+
+                // Floor check
+                if (ball.y + ball.radius >= canvas.height - 40) {
+                    gameOver = true;
+                }
+                if (ball.y - ball.radius <= 0) {
+                    ball.y = ball.radius;
+                    ball.velocity = 1;
+                }
+            }
+
+            drawStadiumObstacles();
+            drawPitchGrass();
+            drawFootball();
+            drawUIPanels();
+
+            requestAnimationFrame(executionLoop);
+        }
+
+        executionLoop();
+    </script>
+</body>
+</html>
