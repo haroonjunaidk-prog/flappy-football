@@ -3,962 +3,813 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Top Bins: Arcade Edition</title>
+    <title>Flappy Football: Top Bins Edition</title>
     <style>
         :root {
-            --bg-dark: #0f172a;
-            --panel-dark: #1e293b;
-            --neon-green: #10b981;
-            --neon-cyan: #06b6d4;
-            --neon-gold: #f59e0b;
-            --neon-red: #ef4444;
-            --text-light: #f8fafc;
+            --stadium-blue: #3b82f6;
+            --stadium-dark: #1e3a8a;
+            --grass-light: #15803d;
+            --grass-dark: #166534;
+            --gold: #fbbf24;
+            --panel-bg: rgba(15, 23, 42, 0.95);
+            --text-main: #f8fafc;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             user-select: none;
+            -webkit-user-select: none;
         }
 
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-light);
+            background: radial-gradient(circle at center, #1e1b4b 0%, #090d16 100%);
+            color: var(--text-main);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             overflow: hidden;
+            padding: 10px;
         }
 
-        #arcade-container {
+        #game-container {
             position: relative;
-            width: 800px;
-            height: 550px;
-            background: var(--panel-dark);
+            width: 500px;
+            height: 520px;
+            background: #0f172a;
             border: 4px solid #334155;
-            border-radius: 16px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 20px rgba(6, 182, 212, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.7);
             overflow: hidden;
         }
 
-        /* Screen States */
-        .screen {
+        /* Menus and Screens Overlay */
+        .interface-screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            background: var(--panel-bg);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 40px;
-            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            padding: 30px;
             z-index: 10;
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            transition: all 0.25s ease;
         }
 
         .hidden {
             opacity: 0;
             pointer-events: none;
-            transform: scale(0.95);
+            transform: scale(0.98);
             z-index: 0;
         }
 
-        /* Typography & Components */
         h1 {
-            font-size: 3rem;
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            letter-spacing: 4px;
-            margin-bottom: 10px;
-            background: linear-gradient(to right, var(--neon-cyan), var(--neon-green));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(6, 182, 212, 0.3);
+            margin-bottom: 8px;
+            text-align: center;
+            color: #ffffff;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        h1 span { color: #4ade80; }
+
+        p.subtitle {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+            text-align: center;
         }
 
-        h2 {
-            font-size: 1.8rem;
-            color: var(--neon-cyan);
-            margin-bottom: 20px;
-        }
-
+        /* Buttons & Forms */
         .btn {
-            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            background: linear-gradient(to bottom, #2563eb, #1d4ed8);
             color: white;
             border: none;
-            padding: 14px 28px;
-            font-size: 1.1rem;
+            padding: 12px 24px;
+            font-size: 1rem;
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
-            transition: all 0.2s ease;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            transition: all 0.15s ease;
         }
-
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.6), 0 0 10px var(--neon-cyan);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.5);
         }
-
         .btn-green {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
-            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+            background: linear-gradient(to bottom, #16a34a, #15803d);
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
         }
         .btn-green:hover {
-            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.6), 0 0 10px var(--neon-green);
+            box-shadow: 0 6px 16px rgba(22, 163, 74, 0.5);
         }
 
-        /* Username Onboarding Screen */
         #username-input {
             background: #0f172a;
             border: 2px solid #475569;
-            padding: 12px 20px;
-            border-radius: 8px;
             color: white;
-            font-size: 1.2rem;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1.1rem;
             text-align: center;
-            margin-bottom: 20px;
-            width: 280px;
+            margin-bottom: 16px;
+            width: 260px;
             outline: none;
-            transition: border-color 0.2s;
         }
-        #username-input:focus {
-            border-color: var(--neon-cyan);
-            box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
-        }
+        #username-input:focus { border-color: #3b82f6; }
 
-        /* Menu Layout */
-        .menu-layout {
+        /* Dashboard Split Grid */
+        .dashboard-grid {
             display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 30px;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 20px;
             width: 100%;
-            height: 80%;
-            margin-top: 10px;
+            height: 65%;
         }
 
-        .menu-left {
+        .modes-column {
             display: flex;
             flex-direction: column;
+            gap: 12px;
             justify-content: center;
-            gap: 20px;
         }
 
-        .mode-card {
-            background: rgba(30, 41, 59, 0.7);
+        .menu-card {
+            background: #1e293b;
             border: 2px solid #334155;
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 10px;
+            padding: 14px;
             cursor: pointer;
             transition: all 0.2s ease;
-            text-align: left;
         }
-        .mode-card:hover {
-            border-color: var(--neon-cyan);
-            background: rgba(30, 41, 59, 0.9);
-            transform: translateX(5px);
+        .menu-card:hover {
+            border-color: #3b82f6;
+            background: #24334d;
+            transform: translateX(4px);
         }
-        .mode-card h3 {
-            font-size: 1.4rem;
-            margin-bottom: 5px;
-            color: white;
-        }
-        .mode-card p {
-            font-size: 0.9rem;
-            color: #94a3b8;
-        }
+        .menu-card h3 { font-size: 1.15rem; margin-bottom: 4px; }
+        .menu-card p { font-size: 0.85rem; color: #94a3b8; }
 
-        /* Leaderboard UI */
-        .leaderboard-panel {
+        /* Leaderboard Style */
+        .lb-box {
             background: #0f172a;
             border: 2px solid #334155;
-            border-radius: 12px;
-            padding: 15px;
+            border-radius: 10px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
         }
-        .leaderboard-title {
-            font-size: 1.1rem;
+        .lb-header {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--gold);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--neon-gold);
-            margin-bottom: 10px;
             text-align: center;
             border-bottom: 1px solid #334155;
-            padding-bottom: 5px;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
         }
-        .leaderboard-rows {
+        .lb-list { display: flex; flex-direction: column; gap: 5px; }
+        .lb-entry {
             display: flex;
-            flex-direction: column;
-            gap: 6px;
-            overflow-y: auto;
-        }
-        .lb-row {
-            display: grid;
-            grid-template-columns: 0.4fr 2fr 1fr;
-            padding: 6px 10px;
+            justify-content: space-between;
             background: #1e293b;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            align-items: center;
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-size: 0.82rem;
+            font-weight: bold;
         }
-        .lb-row.player-highlight {
-            border: 1px solid var(--neon-cyan);
-            background: rgba(6, 182, 212, 0.1);
-        }
-        .lb-rank { font-weight: bold; color: #94a3b8; }
-        .lb-name { color: white; font-weight: 500; }
-        .lb-score { text-align: right; font-weight: bold; color: var(--neon-green); }
+        .lb-entry.user-highlight { border: 1px solid #3b82f6; background: rgba(59, 130, 246, 0.15); }
 
-        /* Level Select Grid */
-        .level-grid {
+        /* Level Mode Selection Map */
+        .level-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin: 30px 0;
+            gap: 12px;
             width: 100%;
+            margin: 20px 0 30px;
         }
-        .level-card {
+        .level-node {
             background: #1e293b;
             border: 2px solid #334155;
-            border-radius: 12px;
-            padding: 25px 15px;
+            border-radius: 10px;
+            padding: 20px 10px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
         }
-        .level-card:hover:not(.locked) {
-            border-color: var(--neon-green);
-            transform: translateY(-5px);
-        }
-        .level-card.locked {
-            opacity: 0.4;
-            cursor: not-allowed;
-            border-style: dashed;
-        }
-        .level-num { font-size: 1.8rem; font-weight: bold; color: white; margin-bottom: 5px;}
-        .level-target { font-size: 0.9rem; color: var(--neon-gold); }
+        .level-node:hover:not(.locked) { border-color: #4ade80; transform: translateY(-3px); }
+        .level-node.locked { opacity: 0.35; cursor: not-allowed; border-style: dashed; }
+        .level-node h4 { font-size: 1.3rem; margin-bottom: 4px; }
+        .level-node span { font-size: 0.75rem; color: var(--gold); font-weight: bold; }
 
-        /* Active Canvas Display */
-        #game-canvas {
-            display: block;
-            background: #111827;
-        }
-
-        #hud {
+        /* HUD Live Overlay */
+        #game-hud {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
+            top: 15px;
+            left: 15px;
+            right: 15px;
             display: flex;
             justify-content: space-between;
             pointer-events: none;
             z-index: 5;
         }
-        .hud-element {
-            background: rgba(15, 23, 42, 0.75);
-            border: 1px solid #334155;
-            padding: 8px 16px;
+        .hud-pill {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid #475569;
+            padding: 6px 14px;
             border-radius: 6px;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-        #hud-score { color: var(--neon-green); }
-        #hud-phase { color: var(--neon-cyan); text-transform: uppercase; font-size: 0.9rem; display: flex; align-items: center;}
-
-        /* Game Over Layout */
-        .game-over-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
-        }
-
-        #welcome-tag {
+            font-weight: 800;
             font-size: 1rem;
-            color: #94a3b8;
-            margin-bottom: 20px;
         }
+        #hud-score { color: #4ade80; }
+        #hud-stage { font-size: 0.8rem; text-transform: uppercase; display: flex; align-items: center; color: #67e8f9;}
+
+        canvas { display: block; background: linear-gradient(to bottom, #3b82f6, #60a5fa); }
     </style>
 </head>
 <body>
 
-<div id="arcade-container">
+<div id="game-container">
 
-    <!-- HUD Overlay for Active Gameplay -->
-    <div id="hud" class="hidden">
-        <div id="hud-score" class="hud-element">Goals: 0</div>
-        <div id="hud-phase" class="hud-element">Phase 1: Warm-Up</div>
+    <!-- Active Gameplay HUD Display -->
+    <div id="game-hud" class="hidden">
+        <div id="hud-score" class="hud-pill">Goals: 0</div>
+        <div id="hud-stage" class="hud-pill">Warm-Up</div>
     </div>
 
-    <!-- 1. USERNAME ONBOARDING SCREEN -->
-    <div id="screen-username" class="screen">
-        <h1>Top Bins Arcade</h1>
-        <p style="color: #94a3b8; margin-bottom: 30px;">Initialize your profile to sync with the Leaderboards.</p>
-        <input type="text" id="username-input" placeholder="ENTER STRIKER NAME" maxlength="12" autocomplete="off">
-        <button id="btn-save-username" class="btn">Confirm Profile</button>
+    <!-- Screen 1: One-Time Username Lock -->
+    <div id="scr-username" class="interface-screen">
+        <h1>STRIKER: <span>TOP BINS</span></h1>
+        <p class="subtitle">Set your identity to unlock automatic leaderboard tracking.</p>
+        <input type="text" id="username-input" placeholder="KICKER INITIALS" maxlength="12">
+        <button id="btn-lock-profile" class="btn">Enter Stadium</button>
     </div>
 
-    <!-- 2. MAIN MENU SCREEN -->
-    <div id="screen-menu" class="screen hidden">
-        <div style="text-align: center;">
-            <h1>Top Bins Edition</h1>
-            <div id="welcome-tag">Welcome, Striker</div>
-        </div>
+    <!-- Screen 2: Central Hub Menu -->
+    <div id="scr-menu" class="interface-screen hidden">
+        <h1 style="font-size: 1.8rem; margin-bottom: 2px;">STADIUM DASHBOARD</h1>
+        <div id="profile-tag" style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 15px;">Welcome</div>
 
-        <div class="menu-layout">
-            <div class="menu-left">
-                <div class="mode-card" id="mode-endless">
-                    <h3>🏆 Endless Mode</h3>
-                    <p>Adapt through evolving difficulty phases. Beat the global legendary bots leaderboard.</p>
+        <div class="dashboard-grid">
+            <div class="modes-column">
+                <div class="menu-card" id="card-endless">
+                    <h3>🏆 Endless Run</h3>
+                    <p>Survive evolving defense tiers. Overtake pre-set bot records cleanly.</p>
                 </div>
-                <div class="mode-card" id="mode-levels">
-                    <h3>🕹️ Campaign Levels</h3>
-                    <p>Conquer curated level scenarios with specific victory targets and win coin bounties.</p>
+                <div class="menu-card" id="card-campaign">
+                    <h3>🕹️ Stage Challenge</h3>
+                    <p>Clear direct target goals across 3 tuned milestone levels.</p>
                 </div>
             </div>
-
-            <div class="leaderboard-panel">
-                <div class="leaderboard-title">👑 Top Standings</div>
-                <div class="leaderboard-rows" id="menu-leaderboard-entries">
-                    <!-- Loaded dynamically via JS -->
-                </div>
+            <div class="lb-box">
+                <div class="lb-header">Leaderboard Standings</div>
+                <div class="lb-list" id="menu-lb-list"></div>
             </div>
         </div>
     </div>
 
-    <!-- 3. CAMPAIGN LEVEL SELECT SCREEN -->
-    <div id="screen-levels" class="screen hidden">
-        <h2>Select Campaign Stage</h2>
-        <p style="color: #94a3b8;">Complete scenarios to earn coin bounties and unlock elite tiers.</p>
-        
-        <div class="level-grid">
-            <div class="level-card" data-level="1">
-                <div class="level-num">Level 1</div>
-                <p style="color: #94a3b8; margin-bottom: 10px;">The Training Ground</p>
-                <div class="level-target">Target: 10 Goals</div>
+    <!-- Screen 3: Campaign Stage Roadmap -->
+    <div id="scr-campaign" class="interface-screen hidden">
+        <h1 style="font-size: 1.6rem;">Select Your Stage</h1>
+        <p class="subtitle">Complete scenarios to open upcoming tiers.</p>
+
+        <div class="level-row">
+            <div class="level-node" data-lvl="1">
+                <h4>Lvl 1</h4>
+                <span>Target: 10</span>
             </div>
-            <div class="level-card" data-level="2" id="lvl-card-2">
-                <div class="level-num">Level 2</div>
-                <p style="color: #94a3b8; margin-bottom: 10px;">Midfield Manhunt</p>
-                <div class="level-target">Target: 15 Goals</div>
+            <div class="level-node" data-lvl="2" id="node-l2">
+                <h4>Lvl 2</h4>
+                <span>Target: 15</span>
             </div>
-            <div class="level-card" data-level="3" id="lvl-card-3">
-                <div class="level-num">Level 3</div>
-                <p style="color: #94a3b8; margin-bottom: 10px;">Clean Sheet Crisis</p>
-                <div class="level-target">Target: 20 Goals</div>
+            <div class="level-node" data-lvl="3" id="node-l3">
+                <h4>Lvl 3</h4>
+                <span>Target: 20</span>
             </div>
         </div>
 
-        <button class="btn btn-back-menu" style="background: #334155;">Back to Main Menu</button>
+        <button class="btn btn-menu-return" style="background: #475569; font-size: 0.85rem; padding: 8px 16px;">Back to Hub</button>
     </div>
 
-    <!-- 4. GAME OVER / WIN SCREEN -->
-    <div id="screen-gameover" class="screen hidden">
-        <h1 id="gameover-title">Match Ended</h1>
-        <p id="gameover-msg" style="color: #94a3b8; margin-bottom: 15px; font-size: 1.2rem;">You scored 0 goals.</p>
-        <p id="leaderboard-alert" style="color: var(--neon-gold); font-weight: bold; margin-bottom: 20px; min-height: 24px;"></p>
+    <!-- Screen 4: Match Summary -->
+    <div id="scr-gameover" class="interface-screen hidden">
+        <h1 id="go-title">Full Time</h1>
+        <p id="go-score" style="font-size: 1.1rem; margin-bottom: 8px;">Goals Scored: 0</p>
+        <p id="go-status" style="color: var(--gold); font-weight: bold; font-size: 0.85rem; margin-bottom: 20px; min-height: 18px;"></p>
 
-        <div class="game-over-buttons">
-            <button id="btn-retry" class="btn btn-green">Play Again</button>
-            <button class="btn btn-back-menu" style="background: #334155;">Main Menu</button>
+        <div style="display: flex; gap: 12px;">
+            <button id="btn-replay" class="btn btn-green">Play Again</button>
+            <button class="btn btn-menu-return" style="background: #475569;">Main Menu</button>
         </div>
     </div>
 
-    <!-- Gameplay Render Window -->
-    <canvas id="game-canvas" width="800" height="550"></canvas>
+    <!-- Game Engine Canvas Interface -->
+    <canvas id="stageCanvas" width="500" height="520"></canvas>
 
 </div>
 
 <script>
-    // --- APP MANAGEMENT & INITIAL SEEDING ---
-    const DEFAULT_BOTS = [
-        { name: "🐐 Messi Bot", score: 15, system: true },
-        { name: "🤖 Ronaldo Bot", score: 12, system: true },
-        { name: "🇧🇷 Neymar Bot", score: 9, system: true },
-        { name: "💎 Yamal Bot", score: 7, system: true },
-        { name: "⚡ Mbappe Bot", score: 5, system: true },
-        { name: "🦁 Zlatan Bot", score: 3, system: true }
+    // --- DATA & HARDWARE SYSTEM CONFIGURATION ---
+    const SEED_RECORDS = [
+        { name: "🐐 Messi Bot", score: 15, bot: true },
+        { name: "🤖 Ronaldo Bot", score: 12, bot: true },
+        { name: "🇧🇷 Neymar Bot", score: 9, bot: true },
+        { name: "💎 Yamal Bot", score: 7, bot: true },
+        { name: "⚡ Mbappe Bot", score: 5, bot: true },
+        { name: "🦁 Zlatan Bot", score: 3, bot: true }
     ];
 
-    let state = {
-        username: localStorage.getItem('strikerName') || '',
-        coins: parseInt(localStorage.getItem('strikerCoins')) || 0,
-        unlockedLevel: parseInt(localStorage.getItem('highestUnlockedLevel')) || 1,
-        leaderboard: JSON.parse(localStorage.getItem('topBinsLeaderboard')) || DEFAULT_BOTS
+    let userProfile = {
+        name: localStorage.getItem('ftb_name') || '',
+        highestLevel: parseInt(localStorage.getItem('ftb_highLvl')) || 1,
+        scores: JSON.parse(localStorage.getItem('ftb_board')) || SEED_RECORDS
     };
 
-    // --- GAMEPLAY CONFIGURATION ---
-    const canvas = document.getElementById('game-canvas');
+    const canvas = document.getElementById('stageCanvas');
     const ctx = canvas.getContext('2d');
 
-    let gameLoopId = null;
-    let isGameRunning = false;
-    let gameMode = 'endless'; // 'endless' or 'levels'
-    let currentLevelNum = 1;
-
-    // Ball/Physics Constants (Balanced Forgiveness)
-    const PHYSICS = {
-        gravity: 0.22,
-        lift: -5.6,
-        scrollSpeed: 2.8,
-        pipeInterval: 240, // spacing horizontal distance
-        pipeGap: 165,      // spacious clear path vertical tunnel
-        ballRadius: 14,
-        hitboxBuffer: 3    // allows close shaves without penalty
+    // Engine Balancers
+    const BALANCER = {
+        gravity: 0.23,
+        kickUp: -5.8,
+        scrollSpeed: 2.5,
+        tunnelInterval: 220,
+        tunnelGap: 165,
+        ballRadius: 13,
+        hitboxCushion: 3.5 // Visual buffer forgiveness to reduce frustration
     };
 
-    // Entities
-    let ball = {};
-    let pipes = [];
-    let goalkeeper = {};
+    let animationId = null;
+    let running = false;
+    let selectedMode = 'endless'; // 'endless' or 'campaign'
+    let levelSelected = 1;
+
+    // Entities State Machine
+    let football = {};
+    let tunnels = [];
+    let keeper = {};
     let score = 0;
     let particles = [];
 
-    // --- SCREEN NAVIGATION HANDLERS ---
-    function showScreen(screenId) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-        document.getElementById('hud').classList.add('hidden');
-        if (screenId) {
-            document.getElementById(screenId).classList.remove('hidden');
+    // --- APPLICATION START AND ROUTING ENGINE ---
+    function bootEngine() {
+        if (!userProfile.name) {
+            switchUI('scr-username');
+        } else {
+            showDashboardMenu();
         }
     }
 
-    function initApp() {
-        if (!state.username) {
-            showScreen('screen-username');
+    document.getElementById('btn-lock-profile').addEventListener('click', () => {
+        let val = document.getElementById('username-input').value.trim();
+        if (val.length >= 2) {
+            userProfile.name = val.toUpperCase();
+            localStorage.setItem('ftb_name', userProfile.name);
+            showDashboardMenu();
         } else {
-            loadMainMenu();
-        }
-    }
-
-    document.getElementById('btn-save-username').addEventListener('click', () => {
-        const input = document.getElementById('username-input').value.trim();
-        if (input.length >= 2) {
-            state.username = input;
-            localStorage.setItem('strikerName', input);
-            loadMainMenu();
-        } else {
-            alert('Please enter a valid striker name (minimum 2 characters).');
+            alert('Please enter at least 2 characters for your profile name.');
         }
     });
 
-    function loadMainMenu() {
-        document.getElementById('welcome-tag').innerText = `Welcome back, ${state.username}! ⚽`;
-        renderLeaderboardMenu();
-        showScreen('screen-menu');
+    function switchUI(screenId) {
+        document.querySelectorAll('.interface-screen').forEach(s => s.classList.add('hidden'));
+        document.getElementById('game-hud').classList.add('hidden');
+        if (screenId) document.getElementById(screenId).classList.remove('hidden');
     }
 
-    function renderLeaderboardMenu() {
-        const container = document.getElementById('menu-leaderboard-entries');
-        container.innerHTML = '';
-        
-        // Sort explicitly before rendering
-        state.leaderboard.sort((a, b) => b.score - a.score);
-        // Truncate to safe top 6 capacity
-        state.leaderboard = state.leaderboard.slice(0, 6);
-        localStorage.setItem('topBinsLeaderboard', JSON.stringify(state.leaderboard));
+    function showDashboardMenu() {
+        document.getElementById('profile-tag').innerText = `ACTIVE PRO STRIKER: ${userProfile.name}`;
+        buildLeaderboardDOM();
+        switchUI('scr-menu');
+    }
 
-        state.leaderboard.forEach((entry, index) => {
-            const isUser = entry.name === state.username && !entry.system;
-            const row = document.createElement('div');
-            row.className = `lb-row ${isUser ? 'player-highlight' : ''}`;
-            row.innerHTML = `
-                <span class="lb-rank">#${index + 1}</span>
-                <span class="lb-name">${entry.name}</span>
-                <span class="lb-score">${entry.score} G</span>
-            `;
-            container.appendChild(row);
+    function buildLeaderboardDOM() {
+        const list = document.getElementById('menu-lb-list');
+        list.innerHTML = '';
+        
+        userProfile.scores.sort((a, b) => b.score - a.score);
+        userProfile.scores = userProfile.scores.slice(0, 6);
+        localStorage.setItem('ftb_board', JSON.stringify(userProfile.scores));
+
+        userProfile.scores.forEach((entry, idx) => {
+            let row = document.createElement('div');
+            let isCurrentPlayer = (entry.name === userProfile.name && !entry.bot);
+            row.className = `lb-entry ${isCurrentPlayer ? 'user-highlight' : ''}`;
+            row.innerHTML = `<span>#${idx+1} ${entry.name}</span><span>${entry.score} G</span>`;
+            list.appendChild(row);
         });
     }
 
-    // --- MODE ROUTING ---
-    document.getElementById('mode-endless').addEventListener('click', () => {
-        gameMode = 'endless';
-        startNewGame();
+    // --- VIEW TRAVERSAL ACTIONS ---
+    document.getElementById('card-endless').addEventListener('click', () => {
+        selectedMode = 'endless';
+        triggerMatchSetup();
     });
 
-    document.getElementById('mode-levels').addEventListener('click', () => {
-        // Update level lock displays
-        document.getElementById('lvl-card-2').className = `level-card ${state.unlockedLevel < 2 ? 'locked' : ''}`;
-        document.getElementById('lvl-card-3').className = `level-card ${state.unlockedLevel < 3 ? 'locked' : ''}`;
-        showScreen('screen-levels');
+    document.getElementById('card-campaign').addEventListener('click', () => {
+        document.getElementById('node-l2').className = `level-node ${userProfile.highestLevel < 2 ? 'locked' : ''}`;
+        document.getElementById('node-l3').className = `level-node ${userProfile.highestLevel < 3 ? 'locked' : ''}`;
+        switchUI('scr-campaign');
     });
 
-    document.querySelectorAll('.level-card').forEach(card => {
-        card.addEventListener('click', function() {
-            const lvl = parseInt(this.getAttribute('data-level'));
-            if (lvl <= state.unlockedLevel) {
-                gameMode = 'levels';
-                currentLevelNum = lvl;
-                startNewGame();
+    document.querySelectorAll('.level-node').forEach(node => {
+        node.addEventListener('click', function() {
+            let selected = parseInt(this.getAttribute('data-lvl'));
+            if (selected <= userProfile.highestLevel) {
+                selectedMode = 'campaign';
+                levelSelected = selected;
+                triggerMatchSetup();
             }
         });
     });
 
-    document.querySelectorAll('.btn-back-menu').forEach(btn => {
-        btn.addEventListener('click', loadMainMenu);
+    document.querySelectorAll('.btn-menu-return').forEach(btn => {
+        btn.addEventListener('click', showDashboardMenu);
     });
 
-    document.getElementById('btn-retry').addEventListener('click', startNewGame);
+    document.getElementById('btn-replay').addEventListener('click', triggerMatchSetup);
 
-    // --- GAME ENGINE IMPLEMENTATION ---
-    function startNewGame() {
-        showScreen(null); // Hide all screen overlays
-        document.getElementById('hud').classList.remove('hidden');
-        
-        isGameRunning = true;
+    // --- GAME ENGINE CYCLE MANAGEMENT ---
+    function triggerMatchSetup() {
+        switchUI(null);
+        document.getElementById('game-hud').classList.remove('hidden');
+
         score = 0;
-        pipes = [];
+        tunnels = [];
         particles = [];
-        
-        ball = {
-            x: 150,
-            y: 250,
-            radius: PHYSICS.ballRadius,
-            velocityY: 0,
-            angle: 0
+        running = true;
+
+        football = {
+            x: 120, y: 200,
+            radius: BALANCER.ballRadius,
+            vY: 0, radAngle: 0
         };
 
-        goalkeeper = {
-            x: 0,
-            y: 200,
-            width: 34,
-            height: 55,
-            speed: 2.2,
-            direction: 1,
-            active: false,
-            mode: 'none' // 'tracking' or 'vertical'
+        keeper = {
+            x: 0, y: 180,
+            width: 32, height: 50,
+            speed: 2.0, heading: 1,
+            enabled: false, pattern: 'none'
         };
 
-        // Spawn first pipe set ahead
-        spawnPipe(600);
-        spawnPipe(600 + PHYSICS.pipeInterval);
+        refreshHUD();
 
-        updateHUD();
+        // Standardize dynamic generation spacing patterns
+        generateTunnelObstacle(450);
+        generateTunnelObstacle(450 + BALANCER.tunnelInterval);
 
-        // Canvas Controls
-        window.removeEventListener('keydown', handleJump);
-        canvas.removeEventListener('mousedown', handleJump);
-        window.addEventListener('keydown', handleJump);
-        canvas.addEventListener('mousedown', handleJump);
-
-        if (gameLoopId) cancelAnimationFrame(gameLoopId);
-        gameLoopId = requestAnimationFrame(gameFrame);
+        if (animationId) cancelAnimationFrame(animationId);
+        animationId = requestAnimationFrame(frameProcessLoop);
     }
 
-    function handleJump(e) {
-        if (e.type === 'keydown' && e.code !== 'Space' && e.code !== 'ArrowUp') return;
-        if (!isGameRunning) return;
-        ball.velocityY = PHYSICS.lift;
-        // Spawn micro turf kick particles
-        for(let i=0; i<4; i++) {
-            particles.push({
-                x: ball.x,
-                y: ball.y + ball.radius,
-                vx: (Math.random() - 0.5) * 3,
-                vy: Math.random() * 2 + 1,
-                radius: Math.random() * 3 + 1,
-                color: '#64748b',
-                alpha: 1,
-                decay: 0.05
-            });
+    // Initialize Input Handlers Globally Once
+    window.addEventListener('keydown', (e) => {
+        if ((e.code === 'Space' || e.code === 'ArrowUp') && running) {
+            e.preventDefault();
+            football.vY = BALANCER.kickUp;
         }
-    }
+    });
+    canvas.addEventListener('mousedown', () => {
+        if (running) football.vY = BALANCER.kickUp;
+    });
 
-    function spawnPipe(startX) {
-        const minHeight = 60;
-        const maxHeight = canvas.height - PHYSICS.pipeGap - minHeight;
-        const topHeight = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
+    function generateTunnelObstacle(xPos) {
+        let padding = 50;
+        let limit = canvas.height - BALANCER.tunnelGap - padding - 40;
+        let topH = Math.floor(Math.random() * (limit - padding + 1)) + padding;
         
-        pipes.push({
-            x: startX,
-            topHeight: topHeight,
-            bottomY: topHeight + PHYSICS.pipeGap,
-            passed: false
+        tunnels.push({
+            x: xPos,
+            topHeight: topH,
+            bottomY: topH + BALANCER.tunnelGap,
+            scored: false
         });
     }
 
-    function updateHUD() {
+    function refreshHUD() {
         document.getElementById('hud-score').innerText = `Goals: ${score}`;
-        
-        const phaseDiv = document.getElementById('hud-phase');
-        if (gameMode === 'endless') {
-            if (score <= 10) phaseDiv.innerHTML = `<span style="color:#10b981">Phase 1: Warm-Up</span>`;
-            else if (score <= 20) phaseDiv.innerHTML = `<span style="color:#06b6d4">Phase 2: Midfield Patrol</span>`;
-            else phaseDiv.innerHTML = `<span style="color:#ef4444">Phase 3: Deep Defense</span>`;
+        let stageText = document.getElementById('hud-stage');
+
+        if (selectedMode === 'endless') {
+            if (score <= 10) stageText.innerHTML = `<span style="color:#4ade80">Phase 1: Warm-Up</span>`;
+            else if (score <= 20) stageText.innerHTML = `<span style="color:#22d3ee">Phase 2: Patrol</span>`;
+            else stageText.innerHTML = `<span style="color:#f87171">Phase 3: Deep Box</span>`;
         } else {
-            phaseDiv.innerHTML = `<span style="color:#f59e0b">Stage ${currentLevelNum} (Target: ${getLevelTarget(currentLevelNum)})</span>`;
+            let targetGoal = levelSelected === 1 ? 10 : levelSelected === 2 ? 15 : 20;
+            stageText.innerHTML = `<span style="color:var(--gold)">Stage ${levelSelected} (Target: ${targetGoal})</span>`;
         }
     }
 
-    function getLevelTarget(lvl) {
-        if (lvl === 1) return 10;
-        if (lvl === 2) return 15;
-        return 20;
+    function frameProcessLoop() {
+        if (!running) return;
+
+        updateFrameState();
+        renderFrameGraphics();
+
+        animationId = requestAnimationFrame(frameProcessLoop);
     }
 
-    // --- CORE GAME LOOP SYSTEM ---
-    function gameFrame() {
-        if (!isGameRunning) return;
+    // --- GAMEPLAY CORE LOGIC ---
+    function updateFrameState() {
+        // 1. Gravity Environment Physics
+        football.vY += BALANCER.gravity;
+        football.y += football.vY;
+        football.radAngle += 0.06;
 
-        updateLogic();
-        renderGraphics();
-
-        gameLoopId = requestAnimationFrame(gameFrame);
-    }
-
-    function updateLogic() {
-        // 1. Ball Physics Environment
-        ball.velocityY += PHYSICS.gravity;
-        ball.y += ball.velocityY;
-        ball.angle += 0.05;
-
-        // Floor / Ceiling Boundaries
-        if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
-            triggerGameOver();
+        // Boundaries Out of Bounds check
+        if (football.y + football.radius > canvas.height - 40 || football.y - football.radius < 0) {
+            endMatchCycle(false);
             return;
         }
 
-        // Determine Upcoming Obstacle Target Anchor
-        let nextPipe = pipes.find(p => p.x + 60 > ball.x - ball.radius);
+        // Identify active upcoming tunnel set
+        let targetTunnel = tunnels.find(t => t.x + 55 > football.x - football.radius);
+        
+        // 2. Intelligent Goalkeeper Adaptive Routing
+        evaluateGoalkeeperAI(targetTunnel);
 
-        // 2. Goalkeeper Phase State & AI Trajectory Mapping
-        configureGoalkeeperAI(nextPipe);
-
-        if (goalkeeper.active) {
-            if (goalkeeper.mode === 'tracking') {
-                // Smooth tracking lag toward the ball's Y center
-                let diffY = ball.y - goalkeeper.y - (goalkeeper.height / 2);
-                let trackingSpeed = 1.9; 
-                goalkeeper.y += Math.sign(diffY) * Math.min(Math.abs(diffY), trackingSpeed);
+        if (keeper.enabled) {
+            if (keeper.pattern === 'tracking') {
+                let trackGap = football.y - keeper.y - (keeper.height / 2);
+                keeper.y += Math.sign(trackGap) * Math.min(Math.abs(trackGap), 1.65); // Eased tracking lag
                 
-                // Absolute safety containment
-                if (goalkeeper.y < 20) goalkeeper.y = 20;
-                if (goalkeeper.y + goalkeeper.height > canvas.height - 20) {
-                    goalkeeper.y = canvas.height - 20 - goalkeeper.height;
-                }
-            } else if (goalkeeper.mode === 'vertical') {
-                // Linear high speed pacing within goal mouth limits
-                goalkeeper.y += goalkeeper.speed * goalkeeper.direction;
-                if (nextPipe) {
-                    if (goalkeeper.y < nextPipe.topHeight + 4 || 
-                        goalkeeper.y + goalkeeper.height > nextPipe.bottomY - 4) {
-                        goalkeeper.direction *= -1;
+                // Keep layout bounded within stadium sky
+                if (keeper.y < 10) keeper.y = 10;
+                if (keeper.y + keeper.height > canvas.height - 50) keeper.y = canvas.height - 50 - keeper.height;
+            } else if (keeper.pattern === 'vertical') {
+                keeper.y += keeper.speed * keeper.heading;
+                if (targetTunnel) {
+                    if (keeper.y < targetTunnel.topHeight + 2 || keeper.y + keeper.height > targetTunnel.bottomY - 2) {
+                        keeper.heading *= -1; // Bounce inside mouth
                     }
                 }
             }
         }
 
-        // 3. Pipe Generation Management
-        pipes.forEach(pipe => {
-            pipe.x -= PHYSICS.scrollSpeed;
+        // 3. Move Obstacles & Calculate Precise Hitbox Collisions
+        for (let i = tunnels.length - 1; i >= 0; i--) {
+            let tun = tunnels[i];
+            tun.x -= BALANCER.scrollSpeed;
 
-            // Collision Calculations with Hitbox Buffer Forgiveness
-            let ballLeft = ball.x - ball.radius + PHYSICS.hitboxBuffer;
-            let ballRight = ball.x + ball.radius - PHYSICS.hitboxBuffer;
-            let ballTop = ball.y - ball.radius + PHYSICS.hitboxBuffer;
-            let ballBottom = ball.y + ball.radius - PHYSICS.hitboxBuffer;
+            // Box Clipping Metrics with Buffer cushion protection
+            let bL = football.x - football.radius + BALANCER.hitboxCushion;
+            let bR = football.x + football.radius - BALANCER.hitboxCushion;
+            let bT = football.y - football.radius + BALANCER.hitboxCushion;
+            let bB = football.y + football.radius - BALANCER.hitboxCushion;
 
-            let pipeLeft = pipe.x;
-            let pipeRight = pipe.x + 60; // Pipe Width
-
-            if (ballRight > pipeLeft && ballLeft < pipeRight) {
-                if (ballTop < pipe.topHeight || ballBottom > pipe.bottomY) {
-                    triggerGameOver();
+            if (bR > tun.x && bL < tun.x + 55) {
+                if (bT < tun.topHeight || bB > tun.bottomY) {
+                    endMatchCycle(false);
                     return;
                 }
             }
 
-            // Clean Score Allocation Pass
-            if (!pipe.passed && pipe.x + 30 < ball.x) {
-                pipe.passed = true;
+            // Clean Scoring Check
+            if (!tun.scored && tun.x + 25 < football.x) {
+                tun.scored = true;
                 score++;
-                updateHUD();
-                triggerGoalExplosion();
-                checkLevelVictoryCondition();
+                refreshHUD();
+                emitGoalParticles();
+                evaluateCampaignMilestone();
             }
-        });
 
-        // 4. Live Goalkeeper Dynamic Hitbox Collision
-        if (goalkeeper.active) {
-            let bLeft = ball.x - ball.radius + PHYSICS.hitboxBuffer;
-            let bRight = ball.x + ball.radius - PHYSICS.hitboxBuffer;
-            let bTop = ball.y - ball.radius + PHYSICS.hitboxBuffer;
-            let bBottom = ball.y + ball.radius - PHYSICS.hitboxBuffer;
+            // Slice out old pipes cleanly going backwards
+            if (tun.x < -80) tunnels.splice(i, 1);
+        }
 
-            if (bRight > goalkeeper.x && bLeft < goalkeeper.x + goalkeeper.width) {
-                if (bBottom > goalkeeper.y && bTop < goalkeeper.y + goalkeeper.height) {
-                    triggerGameOver();
+        // 4. Live Goalkeeper Active Hitbox Clipping
+        if (keeper.enabled) {
+            let bL = football.x - football.radius + BALANCER.hitboxCushion;
+            let bR = football.x + football.radius - BALANCER.hitboxCushion;
+            let bT = football.y - football.radius + BALANCER.hitboxCushion;
+            let bB = football.y + football.radius - BALANCER.hitboxCushion;
+
+            if (bR > keeper.x && bL < keeper.x + keeper.width) {
+                if (bB > keeper.y && bT < keeper.y + keeper.height) {
+                    endMatchCycle(false);
                     return;
                 }
             }
         }
 
-        // Cleanup out-of-bounds obstacles
-        if (pipes.length > 0 && pipes[0].x < -100) {
-            pipes.shift();
+        // Procedural Generation Anchor
+        if (tunnels[tunnels.length - 1].x < canvas.width - BALANCER.tunnelInterval) {
+            generateTunnelObstacle(canvas.width);
         }
 
-        // Infinite spawn manager
-        if (pipes[pipes.length - 1].x < canvas.width - PHYSICS.pipeInterval) {
-            spawnPipe(canvas.width);
+        // 5. Update Explosion Particles safely backwards
+        for (let i = particles.length - 1; i >= 0; i--) {
+            let p = particles[i];
+            p.x += p.vX; p.y += p.vY; p.alpha -= p.fade;
+            if (p.alpha <= 0) particles.splice(i, 1);
         }
-
-        // Particle simulations physics
-        particles.forEach((p, idx) => {
-            p.x += p.vx;
-            p.y += p.vy;
-            p.alpha -= p.decay;
-            if (p.alpha <= 0) particles.splice(idx, 1);
-        });
     }
 
-    function configureGoalkeeperAI(nextPipe) {
-        if (!nextPipe) return;
+    function evaluateGoalkeeperAI(targetTunnel) {
+        if (!targetTunnel) return;
 
-        if (gameMode === 'endless') {
+        if (selectedMode === 'endless') {
             if (score <= 10) {
-                goalkeeper.active = false;
-                goalkeeper.mode = 'none';
+                keeper.enabled = false;
             } else if (score <= 20) {
-                // Phase 2: Open space patrol tracking the ball height
-                goalkeeper.active = true;
-                goalkeeper.mode = 'tracking';
-                // Lock goalie perfectly between current field lines
-                goalkeeper.x = nextPipe.x - 110; 
+                // Phase 2: Position keeper directly in empty air gap tracking ball height
+                keeper.enabled = true;
+                keeper.pattern = 'tracking';
+                keeper.x = targetTunnel.x - 90;
             } else {
-                // Phase 3: Classic dynamic block right inside goal lines
-                goalkeeper.active = true;
-                if (goalkeeper.mode !== 'vertical') {
-                    goalkeeper.mode = 'vertical';
-                    goalkeeper.y = nextPipe.topHeight + 10;
-                    goalkeeper.speed = 3.2; 
+                // Phase 3: Position right inside the tunnel moving up and down pacing
+                keeper.enabled = true;
+                if (keeper.pattern !== 'vertical') {
+                    keeper.pattern = 'vertical';
+                    keeper.y = targetTunnel.topHeight + 5;
+                    keeper.speed = 2.8;
                 }
-                goalkeeper.x = nextPipe.x + 12; // Mounted on internal goal line
+                keeper.x = targetTunnel.x + 12;
             }
         } else {
-            // Campaigns State Rules Override
-            if (currentLevelNum === 1) {
-                goalkeeper.active = false;
-            } else if (currentLevelNum === 2) {
-                goalkeeper.active = true;
-                goalkeeper.mode = 'tracking';
-                goalkeeper.x = nextPipe.x - 110;
-            } else if (currentLevelNum === 3) {
-                goalkeeper.active = true;
-                if (goalkeeper.mode !== 'vertical') {
-                    goalkeeper.mode = 'vertical';
-                    goalkeeper.y = nextPipe.topHeight + 10;
-                    goalkeeper.speed = 3.4;
+            // Campaign Discrete Assignment Configurations
+            if (levelSelected === 1) {
+                keeper.enabled = false;
+            } else if (levelSelected === 2) {
+                keeper.enabled = true;
+                keeper.pattern = 'tracking';
+                keeper.x = targetTunnel.x - 90;
+            } else {
+                keeper.enabled = true;
+                if (keeper.pattern !== 'vertical') {
+                    keeper.pattern = 'vertical';
+                    keeper.y = targetTunnel.topHeight + 5;
+                    keeper.speed = 3.0;
                 }
-                goalkeeper.x = nextPipe.x + 12;
+                keeper.x = targetTunnel.x + 12;
             }
         }
     }
 
-    function triggerGoalExplosion() {
-        for (let i = 0; i < 16; i++) {
+    function emitGoalParticles() {
+        for(let i=0; i<12; i++) {
             particles.push({
-                x: ball.x + 20,
-                y: ball.y,
-                vx: Math.random() * 4 + 2,
-                vy: (Math.random() - 0.5) * 6,
-                radius: Math.random() * 4 + 2,
-                color: i % 2 === 0 ? varColor('--neon-green') : varColor('--neon-cyan'),
-                alpha: 1,
-                decay: 0.03
+                x: football.x + 15, y: football.y,
+                vX: Math.random() * 3 + 2, vY: (Math.random() - 0.5) * 5,
+                radius: Math.random() * 3 + 2,
+                color: i % 2 === 0 ? '#4ade80' : '#fbbf24',
+                alpha: 1, fade: 0.04
             });
         }
     }
 
-    function checkLevelVictoryCondition() {
-        if (gameMode !== 'levels') return;
+    function evaluateCampaignMilestone() {
+        if (selectedMode !== 'campaign') return;
+        let targetGoal = levelSelected === 1 ? 10 : levelSelected === 2 ? 15 : 20;
         
-        let target = getLevelTarget(currentLevelNum);
-        if (score >= target) {
-            isGameRunning = false;
-            cancelAnimationFrame(gameLoopId);
-
-            // Compute Financial/Campaign Progress Payouts
-            let bounty = currentLevelNum === 1 ? 10 : currentLevelNum === 2 ? 20 : 50;
-            state.coins += bounty;
-            localStorage.setItem('strikerCoins', state.coins);
-
-            if (currentLevelNum === state.unlockedLevel && state.unlockedLevel < 3) {
-                state.unlockedLevel++;
-                localStorage.setItem('highestUnlockedLevel', state.unlockedLevel);
+        if (score >= targetGoal) {
+            if (levelSelected === userProfile.highestLevel && userProfile.highestLevel < 3) {
+                userProfile.highestLevel++;
+                localStorage.setItem('ftb_highLvl', userProfile.highestLevel);
             }
-
-            document.getElementById('gameover-title').innerText = "🏆 Victory!";
-            document.getElementById('gameover-title').style.background = "linear-gradient(to right, #f59e0b, #10b981)";
-            document.getElementById('gameover-title').style.webkitBackgroundClip = "text";
-            
-            document.getElementById('gameover-msg').innerHTML = `
-                Stage ${currentLevelNum} Cleared Successfully!<br>
-                <span style="color:var(--neon-gold); font-weight:bold;">+${bounty} Coins Campaign Bounty Added!</span>
-            `;
-            document.getElementById('leaderboard-alert').innerText = currentLevelNum === 3 ? "🏆 YOU CONQUERED THE CAMPAIGN MODE!" : "Next stage unlocked in menus.";
-            
-            showScreen('screen-gameover');
+            endMatchCycle(true);
         }
     }
 
-    function triggerGameOver() {
-        isGameRunning = false;
-        cancelAnimationFrame(gameLoopId);
+    function endMatchCycle(isCampaignWin) {
+        running = false;
+        cancelAnimationFrame(animationId);
 
-        document.getElementById('gameover-title').innerText = "Match Ended";
-        document.getElementById('gameover-title').style.background = "linear-gradient(to right, #ef4444, #f59e0b)";
-        document.getElementById('gameover-title').style.webkitBackgroundClip = "text";
-        document.getElementById('gameover-msg').innerText = `Total Net Score: ${score} Goals.`;
+        let title = document.getElementById('go-title');
+        let txtScore = document.getElementById('go-score');
+        let txtStatus = document.getElementById('go-status');
 
-        let alertDiv = document.getElementById('leaderboard-alert');
-        alertDiv.innerText = "";
+        txtStatus.innerText = "";
 
-        if (gameMode === 'endless') {
-            // SILENT LEADERBOARD RECORD VALIDATION LOGIC
-            let eligibilityCheck = checkLeaderboardEligibility(score);
-            if (eligibilityCheck.qualified) {
-                alertDiv.innerText = `🔥 Automatic Leaderboard Sync: Position #${eligibilityCheck.rank}!`;
+        if (isCampaignWin) {
+            title.innerHTML = "🏆 STAGE CLEARED";
+            txtScore.innerHTML = `Completed Stage ${levelSelected} at ${score} Goals!`;
+            txtStatus.innerText = levelSelected === 3 ? "👑 CAMPAIGN COMPLETE - YOU ARE THE GOAT!" : "Next challenge tier unlocked on dashboard.";
+        } else {
+            title.innerHTML = "MATCH ENDED";
+            txtScore.innerText = `Final Net Score: ${score} Goals`;
+            
+            if (selectedMode === 'endless') {
+                // Silently trace high score ranks behind scenes instantly
+                let syncLog = executeAutomaticLeaderboardSync(score);
+                if (syncLog.qualified) {
+                    txtStatus.innerText = `🔥 Automatic Live Board Sync: Slot Placement #${syncLog.rank}!`;
+                }
             }
         }
-        
-        showScreen('screen-gameover');
+        switchUI('scr-gameover');
     }
 
-    function checkLeaderboardEligibility(userScore) {
-        state.leaderboard.sort((a, b) => b.score - a.score);
-        
-        // Qualification benchmark logic check
-        let qualified = false;
-        let targetRank = -1;
+    function executeAutomaticLeaderboardSync(finalScore) {
+        userProfile.scores.sort((a, b) => b.score - a.score);
+        let check = { qualified: false, rank: -1 };
 
-        if (state.leaderboard.length < 6 || userScore > state.leaderboard[state.leaderboard.length - 1].score) {
-            qualified = true;
+        if (userProfile.scores.length < 6 || finalScore > userProfile.scores[userProfile.scores.length - 1].score) {
+            check.qualified = true;
+            userProfile.scores.push({ name: userProfile.name, score: finalScore, bot: false });
             
-            // Insert records cleanly
-            state.leaderboard.push({
-                name: state.username,
-                score: userScore,
-                system: false
-            });
-
-            // Re-sort and slice safely to preserve capacity
-            state.leaderboard.sort((a, b) => b.score - a.score);
-            state.leaderboard = state.leaderboard.slice(0, 6);
-            localStorage.setItem('topBinsLeaderboard', JSON.stringify(state.leaderboard));
-
-            // Trace index slot position
-            targetRank = state.leaderboard.findIndex(e => e.name === state.username && e.score === userScore) + 1;
+            userProfile.scores.sort((a, b) => b.score - a.score);
+            userProfile.scores = userProfile.scores.slice(0, 6);
+            localStorage.setItem('ftb_board', JSON.stringify(userProfile.scores));
+            
+            check.rank = userProfile.scores.findIndex(e => e.name === userProfile.name && e.score === finalScore && !e.bot) + 1;
         }
-
-        return { qualified: qualified, rank: targetRank };
+        return check;
     }
 
-    // --- ARTISTIC GRAPHICS RENDERING ENGINE ---
-    function renderGraphics() {
-        // Background Clean
-        ctx.fillStyle = '#111827';
+    // --- VISUAL RENDERING ENGINE ---
+    function renderFrameGraphics() {
+        // 1. Classic Blue Sky Daylight Gradient Environment
+        let skyG = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        skyG.addColorStop(0, '#1e3a8a');
+        skyG.addColorStop(0.6, '#3b82f6');
+        skyG.addColorStop(0.9, '#60a5fa');
+        ctx.fillStyle = skyG;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Drawing Field Lines Grid Accents
-        ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-        ctx.lineWidth = 2;
-        for(let i=0; i<canvas.width; i+=60) {
-            ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+        // 2. Pitch Alternating Dark/Light Green Grass Tiers at base
+        let pitchY = canvas.height - 40;
+        for (let x = 0; x < canvas.width; x += 40) {
+            ctx.fillStyle = (x / 40 % 2 === 0) ? '#15803d' : '#166534';
+            ctx.fillRect(x, pitchY, 40, 40);
         }
+        // White touchline accent bounds
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.fillRect(0, pitchY, canvas.width, 3);
 
-        // Render Pitch Turf Lines Bottom Shadow
-        ctx.fillStyle = '#0f172a';
-        ctx.fillRect(0, canvas.height - 12, canvas.width, 12);
-        ctx.fillStyle = varColor('--neon-green');
-        ctx.fillRect(0, canvas.height - 12, canvas.width, 2);
-
-        // Render Obstacle Tunnels (Pipes)
-        pipes.forEach(pipe => {
-            ctx.shadowBlur = 0;
+        // 3. Render Solid Structural White/Sleek Posts (Tunnels)
+        tunnels.forEach(t => {
+            // Top White Goal Pillar Post
+            let postGrad = ctx.createLinearGradient(t.x, 0, t.x + 55, 0);
+            postGrad.addColorStop(0, '#e2e8f0');
+            postGrad.addColorStop(0.3, '#ffffff');
+            postGrad.addColorStop(1, '#cbd5e1');
             
-            // Top Structure Goal Post
-            let topGrad = ctx.createLinearGradient(pipe.x, 0, pipe.x + 60, 0);
-            topGrad.addColorStop(0, '#334155');
-            topGrad.addColorStop(0.5, '#475569');
-            topGrad.addColorStop(1, '#1e293b');
-            ctx.fillStyle = topGrad;
-            ctx.fillRect(pipe.x, 0, 60, pipe.topHeight);
+            ctx.fillStyle = postGrad;
+            ctx.fillRect(t.x, 0, 55, t.topHeight);
+            
+            // Neon crossbar rim highlight caps
+            ctx.fillStyle = '#22d3ee';
+            ctx.fillRect(t.x - 2, t.topHeight - 5, 59, 5);
 
-            // Top Bright Rim Border Base
-            ctx.fillStyle = varColor('--neon-cyan');
-            ctx.fillRect(pipe.x - 2, pipe.topHeight - 6, 64, 6);
-
-            // Bottom Structure Goal Post
-            let botGrad = ctx.createLinearGradient(pipe.x, pipe.bottomY, pipe.x + 60, canvas.height);
-            botGrad.addColorStop(0, '#334155');
-            botGrad.addColorStop(0.5, '#475569');
-            botGrad.addColorStop(1, '#1e293b');
-            ctx.fillStyle = botGrad;
-            ctx.fillRect(pipe.x, pipe.bottomY, 60, canvas.height - pipe.bottomY);
-
-            // Bottom Bright Rim Border Base
-            ctx.fillStyle = varColor('--neon-cyan');
-            ctx.fillRect(pipe.x - 2, pipe.bottomY, 64, 6);
+            // Bottom White Goal Pillar Post
+            ctx.fillStyle = postGrad;
+            ctx.fillRect(t.x, t.bottomY, 55, canvas.height - t.bottomY - 40);
+            
+            ctx.fillStyle = '#22d3ee';
+            ctx.fillRect(t.x - 2, t.bottomY, 59, 5);
         });
 
-        // Render Goalkeeper
-        if (goalkeeper.active) {
-            ctx.shadowColor = goalkeeper.mode === 'tracking' ? varColor('--neon-cyan') : varColor('--neon-red');
-            ctx.shadowBlur = 10;
-
-            // Jersey Frame body mapping
-            ctx.fillStyle = goalkeeper.mode === 'tracking' ? '#06b6d4' : '#ef4444';
-            ctx.fillRect(goalkeeper.x, goalkeeper.y, goalkeeper.width, goalkeeper.height);
+        // 4. Render Active Goalkeeper (Classic Red/Cyan Kits)
+        if (keeper.enabled) {
+            ctx.fillStyle = keeper.pattern === 'tracking' ? '#06b6d4' : '#ef4444';
+            ctx.fillRect(keeper.x, keeper.y, keeper.width, keeper.height);
             
-            // Neon Stripes Trim accents
+            // White Trim Highlights
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(goalkeeper.x + 6, goalkeeper.y, 4, goalkeeper.height);
-            ctx.fillRect(goalkeeper.x + goalkeeper.width - 10, goalkeeper.y, 4, goalkeeper.height);
+            ctx.fillRect(keeper.x + 4, keeper.y, 4, keeper.height);
+            ctx.fillRect(keeper.x + keeper.width - 8, keeper.y, 4, keeper.height);
             
-            // Keeper Gloves/Head indicators
+            // Keeper Gloves
             ctx.fillStyle = '#f59e0b';
-            ctx.fillRect(goalkeeper.x - 4, goalkeeper.y + 12, 4, 10); // Left glove
-            ctx.fillRect(goalkeeper.x + goalkeeper.width, goalkeeper.y + 12, 4, 10); // Right glove
-            
-            ctx.shadowBlur = 0;
+            ctx.fillRect(keeper.x - 3, keeper.y + 12, 3, 8);
+            ctx.fillRect(keeper.x + keeper.width, keeper.y + 12, 3, 8);
         }
 
-        // Render Soccer Match Ball
+        // 5. Render High Polish Classic Soccer Matchball
         ctx.save();
-        ctx.translate(ball.x, ball.y);
-        ctx.rotate(ball.angle);
+        ctx.translate(football.x, football.y);
+        ctx.rotate(football.radAngle);
         
-        ctx.shadowColor = varColor('--neon-green');
-        ctx.shadowBlur = 8;
-        
-        // Base sphere shell
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.arc(0, 0, ball.radius, 0, Math.PI * 2);
+        ctx.arc(0, 0, football.radius, 0, Math.PI * 2);
         ctx.fill();
         
-        // Classic Pentagonal Soccer Line Strips
         ctx.strokeStyle = '#0f172a';
-        ctx.lineWidth = 1.5;
-        for (let i = 0; i < 5; i++) {
+        ctx.lineWidth = 1.2;
+        for(let i=0; i<5; i++) {
             ctx.beginPath();
             ctx.moveTo(0, 0);
-            let angle = (Math.PI * 2 / 5) * i;
-            ctx.lineTo(Math.cos(angle) * ball.radius, Math.sin(angle) * ball.radius);
+            let a = (Math.PI * 2 / 5) * i;
+            ctx.lineTo(Math.cos(a) * football.radius, Math.sin(a) * football.radius);
             ctx.stroke();
         }
         ctx.restore();
-        ctx.shadowBlur = 0;
 
-        // Render Particle Explosions
+        // 6. Particle Processing
         particles.forEach(p => {
             ctx.save();
             ctx.globalAlpha = p.alpha;
@@ -970,16 +821,8 @@
         });
     }
 
-    // Helper translation string hex fetcher
-    function varColor(variableName) {
-        if(variableName === '--neon-green') return '#10b981';
-        if(variableName === '--neon-cyan') return '#06b6d4';
-        if(variableName === '--neon-red') return '#ef4444';
-        return '#ffffff';
-    }
-
-    // Fire application lifecycle
-    initApp();
+    // Launch Application
+    bootEngine();
 </script>
 
 </body>
