@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Flappy Football: Top Bins Edition</title>
+    <meta name="description" content="Play Flappy Football: Striker Top Bins Edition! A challenging mobile-friendly arcade game where you juggle the football and dash past the moving goalkeeper.">
+    <meta name="keywords" content="flappy football, striker top bins, haroonjunaidk-prog, github io football game, flappy bird soccer, browser football game">
+    <meta name="author" content="haroonjunaidk-prog">
     <style>
         :root {
             --bg-dark: #090d16;
@@ -30,28 +33,28 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             min-height: 100vh;
-            overflow: hidden;
             background: radial-gradient(circle at center, #1e1b4b 0%, #090d16 100%);
             touch-action: none;
-            padding: 10px;
+            padding: 15px 10px;
+            overflow-y: auto; /* Allows scrolling down through shop & leaderboard */
         }
 
         .game-container {
             text-align: center;
             position: relative;
             width: 100%;
-            max-width: 480px;
+            max-width: 450px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
         h1 {
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 900;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             text-transform: uppercase;
             letter-spacing: 2px;
             text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
@@ -66,42 +69,139 @@
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            margin-bottom: 12px;
-            font-size: 13px;
+            margin-bottom: 10px;
+            font-size: 12px;
             font-weight: 700;
             background: rgba(15, 23, 42, 0.8);
-            padding: 12px 16px;
+            padding: 10px 14px;
             border-radius: 12px;
             border: 2px dashed #1e293b;
             backdrop-filter: blur(4px);
         }
 
         .score span { color: var(--accent-green); }
-        .multiplier span { color: var(--neon-blue); }
-        .high-score span { color: var(--gold); }
+        .coins span { color: var(--gold); font-weight: 900; }
+        .high-score span { color: var(--neon-blue); }
 
         canvas {
             background: linear-gradient(to bottom, #1e3a8a, #3b82f6);
             border: 4px solid #1e293b;
             border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
             display: block;
-            max-width: 100%;
+            width: 100%;
             height: auto;
-            max-height: 65vh;
-            aspect-ratio: 480 / 520;
+            max-height: 50vh;
+            aspect-ratio: 450 / 480;
         }
 
-        .controls-hint {
-            margin-top: 12px;
-            font-size: 11px;
-            color: #94a3b8;
-            background: rgba(0,0,0,0.5);
-            padding: 8px 14px;
-            border-radius: 20px;
+        /* DUAL LOCKER ROOM SHOP PANEL */
+        .shop-panel, .leaderboard-panel {
             width: 100%;
-            line-height: 1.4;
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid #1e293b;
+            border-radius: 16px;
+            margin-top: 12px;
+            padding: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        .panel-title {
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gold);
+            margin-bottom: 10px;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .shop-items {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+
+        .shop-card {
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 10px;
+            padding: 8px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .shop-card.active {
+            border-color: var(--accent-green);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .item-preview {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            margin-bottom: 6px;
+        }
+
+        .preview-classic { background: white; border: 2px dashed black; }
+        .preview-fire { background: #ef4444; box-shadow: 0 0 10px #f97316; }
+        .preview-gold { background: #fbbf24; box-shadow: 0 0 10px #d97706; }
+        .preview-matrix { background: #06b6d4; box-shadow: 0 0 10px #0891b2; }
+
+        .item-name {
+            font-size: 9px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #94a3b8;
+        }
+
+        .shop-btn {
+            width: 100%;
+            font-size: 9px;
+            font-weight: 800;
+            padding: 4px 2px;
+            border: none;
+            border-radius: 4px;
+            text-transform: uppercase;
+            color: white;
+            background: #475569;
+        }
+
+        .shop-card.active .shop-btn { background: var(--accent-green); }
+        .shop-btn.buyable { background: var(--gold); color: #0f172a; }
+
+        /* ARCADE LEADERBOARD PANEL LAYOUT */
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .leaderboard-row {
+            display: flex;
+            justify-content: space-between;
+            background: #0f172a;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
             border: 1px solid #1e293b;
+        }
+
+        .leaderboard-row.rank-1 { border-color: var(--gold); color: var(--gold); }
+        .leaderboard-row.rank-2 { border-color: #cbd5e1; color: #cbd5e1; }
+        .leaderboard-row.rank-3 { border-color: #b45309; color: #cd7f32; }
+
+        .controls-hint {
+            margin-top: 10px;
+            font-size: 10px;
+            color: #64748b;
+            text-align: center;
         }
     </style>
 </head>
@@ -112,15 +212,52 @@
         
         <div class="scoreboard">
             <div class="score">Goals: <span id="current-score">0</span></div>
-            <div class="multiplier">Mult: <span id="score-mult">x1</span></div>
+            <div class="coins">💰 Coins: <span id="coin-count">0</span></div>
             <div class="high-score">Record: <span id="high-score">0</span></div>
         </div>
 
-        <canvas id="gameCanvas" width="480" height="520"></canvas>
+        <canvas id="gameCanvas" width="450" height="480"></canvas>
+
+        <div class="shop-panel">
+            <div class="panel-title">
+                <span>🛒 LOCKER SHOP</span>
+                <span style="font-size:10px; color:#94a3b8;">Tap to Equip</span>
+            </div>
+            <div class="shop-items">
+                <div class="shop-card active" id="skin-classic" onclick="selectSkin('classic')">
+                    <div class="item-preview preview-classic"></div>
+                    <div class="item-name">Classic</div>
+                    <button class="shop-btn" id="btn-classic">Active</button>
+                </div>
+                <div class="shop-card" id="skin-fire" onclick="selectSkin('fire')">
+                    <div class="item-preview preview-fire"></div>
+                    <div class="item-name">Fireball</div>
+                    <button class="shop-btn" id="btn-fire">💰 15</button>
+                </div>
+                <div class="shop-card" id="skin-gold" onclick="selectSkin('gold')">
+                    <div class="item-preview preview-gold"></div>
+                    <div class="item-name">Championship</div>
+                    <button class="shop-btn" id="btn-gold">💰 30</button>
+                </div>
+                <div class="shop-card" id="skin-matrix" onclick="selectSkin('matrix')">
+                    <div class="item-preview preview-matrix"></div>
+                    <div class="item-name">Matrix</div>
+                    <button class="shop-btn" id="btn-matrix">💰 50</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="leaderboard-panel">
+            <div class="panel-title">
+                <span>🏆 TOP 5 STRIKERS</span>
+                <span style="font-size:10px; color:var(--neon-blue);">Device Records</span>
+            </div>
+            <div class="leaderboard-list" id="leaderboard-display">
+                </div>
+        </div>
 
         <div class="controls-hint">
-            💻 **PC:** SPACE to kick. LEFT/RIGHT arrows to dash ball. <br>
-            📱 **MOBILE:** Tap center to kick. Tap/Hold outer edges to DASH!
+            💻 PC: SPACE to kick, Arrows to dash | 📱 Mobile: Tap edges to dash, center to kick
         </div>
     </div>
 
@@ -128,45 +265,73 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
+        // Persistent Profile Memory Data System
         let highScore = 0;
-        try { highScore = localStorage.getItem('ftbHighScore') || 0; } catch (e) {}
+        let totalCoins = 0;
+        let equippedSkin = 'classic';
+        let unlockedSkins = ['classic'];
+        
+        // Load Leaderboard data or set default arcade target bots
+        let leaderboard = [
+            { name: "Ronaldo Bot", score: 12 },
+            { name: "Messi Bot", score: 9 },
+            { name: "Neymar Bot", score: 6 },
+            { name: "Salah Bot", score: 4 },
+            { name: "Mbappe Bot", score: 2 }
+        ];
+
+        try { 
+            highScore = parseInt(localStorage.getItem('ftbHighScore')) || 0; 
+            totalCoins = parseInt(localStorage.getItem('ftbTotalCoins')) || 0;
+            equippedSkin = localStorage.getItem('ftbEquippedSkin') || 'classic';
+            
+            let savedSkins = JSON.parse(localStorage.getItem('ftbUnlockedSkins'));
+            if(savedSkins) unlockedSkins = savedSkins;
+
+            let savedLeaderboard = JSON.parse(localStorage.getItem('ftbLeaderboard'));
+            if(savedLeaderboard) leaderboard = savedLeaderboard;
+        } catch (e) {}
+        
         document.getElementById('high-score').innerText = highScore;
+        document.getElementById('coin-count').innerText = totalCoins;
+
+        const skinPrices = { fire: 15, gold: 30, matrix: 50 };
 
         let score = 0;
-        let comboMultiplier = 1;
         let gameStarted = false;
         let gameOver = false;
+        let leaderboardChecked = false; // Flag to prevent multiple name prompts in one loop
 
-        // Football Physics
         const ball = {
             x: 100,
-            y: 220,
+            y: 200,
             radius: 13,
             gravity: 0.36,
             lift: -6.8,
             velocity: 0,
-            xVelocity: 0, // Track dedicated side-to-side dash speeds
+            xVelocity: 0,
             rotation: 0
         };
 
         let obstacles = [];
         let targets = [];
+        let coins = [];
+        
         const obstacleWidth = 45;
-        const obstacleGap = 170; 
+        const obstacleGap = 165; 
         let obstacleSpeed = 2.6;
         let spawnTimer = 0;
 
         let keys = { curveLeft: false, curveRight: false };
 
-        // Keyboard Inputs (Instantly sets swift dash movement velocity)
         window.addEventListener('keydown', e => {
             if (e.key === 'ArrowLeft' || e.key === 'a') {
                 keys.curveLeft = true;
-                ball.xVelocity = -3.5; // Snap dash left
+                ball.xVelocity = -3.5;
             }
             if (e.key === 'ArrowRight' || e.key === 'd') {
                 keys.curveRight = true;
-                ball.xVelocity = 3.5;  // Snap dash right
+                ball.xVelocity = 3.5;
             }
             if (e.key === ' ' || e.code === 'Space') {
                 e.preventDefault();
@@ -178,7 +343,6 @@
             if (e.key === 'ArrowRight' || e.key === 'd') keys.curveRight = false;
         });
 
-        // Touch Interaction map configured for high speed side dashing
         function handlePointerStart(clientX) {
             if (gameOver) { resetGame(); return; }
             
@@ -186,17 +350,15 @@
             const relativeX = clientX - rect.left;
             const canvasWidthVisual = rect.width;
 
-            // Side zones trigger immediate directional dash boosts
-            if (relativeX < canvasWidthVisual * 0.25) {
+            if (relativeX < canvasWidthVisual * 0.23) {
                 keys.curveLeft = true;
-                ball.xVelocity = -4.0; // Mobile Dash Left!
+                ball.xVelocity = -4.0;
                 if (!gameStarted) gameStarted = true;
-            } else if (relativeX > canvasWidthVisual * 0.75) {
+            } else if (relativeX > canvasWidthVisual * 0.77) {
                 keys.curveRight = true;
-                ball.xVelocity = 4.0;  // Mobile Dash Right!
+                ball.xVelocity = 4.0;
                 if (!gameStarted) gameStarted = true;
             } else {
-                // Center taps trigger normal upward flight mechanics
                 juggleBall();
             }
         }
@@ -221,12 +383,102 @@
             ball.velocity = ball.lift;
         }
 
+        // Shop UI Sync Mechanics
+        function updateShopUI() {
+            const skinIds = ['classic', 'fire', 'gold', 'matrix'];
+            skinIds.forEach(id => {
+                const card = document.getElementById(`skin-${id}`);
+                const btn = document.getElementById(`btn-${id}`);
+                card.classList.remove('active');
+                
+                if (equippedSkin === id) {
+                    card.classList.add('active');
+                    btn.innerText = "Active";
+                    btn.className = "shop-btn";
+                } else if (unlockedSkins.includes(id)) {
+                    btn.innerText = "Equip";
+                    btn.className = "shop-btn";
+                } else {
+                    btn.innerText = `💰 ${skinPrices[id]}`;
+                    btn.className = totalCoins >= skinPrices[id] ? "shop-btn buyable" : "shop-btn";
+                }
+            });
+        }
+
+        function selectSkin(id) {
+            if (unlockedSkins.includes(id)) {
+                equippedSkin = id;
+                try { localStorage.setItem('ftbEquippedSkin', id); } catch(e){}
+            } else {
+                const cost = skinPrices[id];
+                if (totalCoins >= cost) {
+                    totalCoins -= cost;
+                    unlockedSkins.push(id);
+                    equippedSkin = id;
+                    document.getElementById('coin-count').innerText = totalCoins;
+                    try { 
+                        localStorage.setItem('ftbTotalCoins', totalCoins);
+                        localStorage.setItem('ftbEquippedSkin', id);
+                        localStorage.setItem('ftbUnlockedSkins', JSON.stringify(unlockedSkins));
+                    } catch(e){}
+                }
+            }
+            updateShopUI();
+        }
+
+        // Leaderboard Visual Render System
+        function updateLeaderboardUI() {
+            const container = document.getElementById('leaderboard-display');
+            container.innerHTML = '';
+            
+            // Sort high scores high to low
+            leaderboard.sort((a, b) => b.score - a.score);
+            // Limit leaderboard profile array to Top 5 elements
+            leaderboard = leaderboard.slice(0, 5);
+            try { localStorage.setItem('ftbLeaderboard', JSON.stringify(leaderboard)); } catch(e){}
+
+            leaderboard.forEach((entry, index) => {
+                const rank = index + 1;
+                let rankClass = '';
+                if (rank === 1) rankClass = 'rank-1';
+                if (rank === 2) rankClass = 'rank-2';
+                if (rank === 3) rankClass = 'rank-3';
+
+                const row = document.createElement('div');
+                row.className = `leaderboard-row ${rankClass}`;
+                row.innerHTML = `<span>#${rank} ${entry.name}</span><span>${entry.score} Goals</span>`;
+                container.appendChild(row);
+            });
+        }
+
+        // Check if the final score qualifies for the leaderboard
+        function checkLeaderboardEligibility() {
+            if (leaderboardChecked) return;
+            
+            const lowestScore = leaderboard.length >= 5 ? leaderboard[leaderboard.length - 1].score : -1;
+            
+            if (score > lowestScore && score > 0) {
+                // Short timeout to let the Game Over screen draw completely first
+                setTimeout(() => {
+                    let initials = prompt("🔥 NEW RECORD OVERTAKE! Enter your name or initials (Max 12 chars):");
+                    if (!initials || initials.trim() === "") initials = "Anonymous";
+                    initials = initials.substring(0, 12).toUpperCase();
+
+                    leaderboard.push({ name: initials, score: score });
+                    leaderboardChecked = true;
+                    updateLeaderboardUI();
+                }, 500);
+            } else {
+                leaderboardChecked = true;
+            }
+        }
+
         function spawnCustomPost() {
-            const pad = 70;
-            const openSpace = canvas.height - obstacleGap - pad - 50;
+            const pad = 65;
+            const openSpace = canvas.height - obstacleGap - pad - 40;
             const topHeight = Math.floor(Math.random() * openSpace) + pad;
 
-            const goalieHeight = 50;
+            const goalieHeight = 48;
             const goalieMinY = topHeight + 5;
             const goalieMaxY = topHeight + obstacleGap - goalieHeight - 5;
 
@@ -236,37 +488,47 @@
                 passed: false,
                 goalieY: topHeight + (obstacleGap / 2) - (goalieHeight / 2),
                 goalieDir: Math.random() > 0.5 ? 1 : -1,
-                goalieSpeed: 1.8,
+                goalieSpeed: 1.9,
                 goalieHeight: goalieHeight,
                 goalieWidth: 16,
                 minY: goalieMinY,
                 maxY: goalieMaxY
             });
 
+            const targetY = topHeight + (obstacleGap / 2) + (Math.random() * 40 - 20);
             targets.push({
                 x: canvas.width + obstacleWidth / 2,
-                y: topHeight + (obstacleGap / 2) + (Math.random() * 40 - 20),
+                y: targetY,
                 radius: 18,
                 hit: false
+            });
+
+            coins.push({
+                x: canvas.width + obstacleWidth / 2 + 55,
+                y: targetY + (Math.random() * 20 - 10),
+                radius: 9,
+                collected: false,
+                pulse: Math.random() * 5
             });
         }
 
         function resetGame() {
-            ball.y = 220;
+            ball.y = 200;
             ball.x = 100;
             ball.velocity = 0;
             ball.xVelocity = 0;
             ball.rotation = 0;
             obstacles = [];
             targets = [];
+            coins = [];
             score = 0;
-            comboMultiplier = 1;
             obstacleSpeed = 2.6;
             document.getElementById('current-score').innerText = score;
-            document.getElementById('score-mult').innerText = "x1";
             gameOver = false;
             gameStarted = false;
+            leaderboardChecked = false;
             spawnTimer = 0;
+            updateShopUI();
         }
 
         function drawFootball() {
@@ -274,28 +536,72 @@
             ctx.translate(ball.x, ball.y);
             ctx.rotate(ball.rotation);
 
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(0, 0, ball.radius, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#020617';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            ctx.fillStyle = '#0f172a';
-            ctx.beginPath();
-            ctx.arc(0, 0, 4, 0, Math.PI*2);
-            ctx.fill();
-
-            ctx.strokeStyle = '#334155';
-            ctx.lineWidth = 1.5;
-            for(let i=0; i<5; i++) {
-                let a = (Math.PI*2/5) * i;
+            if (equippedSkin === 'classic') {
+                ctx.fillStyle = '#ffffff';
                 ctx.beginPath();
-                ctx.moveTo(0,0);
-                ctx.lineTo(Math.cos(a)*ball.radius, Math.sin(a)*ball.radius);
+                ctx.arc(0, 0, ball.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#020617';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.fillStyle = '#0f172a';
+                ctx.beginPath();
+                ctx.arc(0, 0, 4, 0, Math.PI*2);
+                ctx.fill();
+                ctx.strokeStyle = '#334155';
+                ctx.lineWidth = 1.2;
+                for(let i=0; i<5; i++) {
+                    let a = (Math.PI*2/5) * i;
+                    ctx.beginPath();
+                    ctx.moveTo(0,0);
+                    ctx.lineTo(Math.cos(a)*ball.radius, Math.sin(a)*ball.radius);
+                    ctx.stroke();
+                }
+            } 
+            else if (equippedSkin === 'fire') {
+                let radG = ctx.createRadialGradient(0,0, 2, 0,0, ball.radius);
+                radG.addColorStop(0, '#fef08a');
+                radG.addColorStop(0.3, '#f97316');
+                radG.addColorStop(1, '#ef4444');
+                ctx.fillStyle = radG;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#f97316';
+                ctx.beginPath();
+                ctx.arc(0, 0, ball.radius, 0, Math.PI*2);
+                ctx.fill();
+            } 
+            else if (equippedSkin === 'gold') {
+                let goldG = ctx.createLinearGradient(-ball.radius, -ball.radius, ball.radius, ball.radius);
+                goldG.addColorStop(0, '#fef08a');
+                goldG.addColorStop(0.5, '#eab308');
+                goldG.addColorStop(1, '#a16207');
+                ctx.fillStyle = goldG;
+                ctx.shadowBlur = 18;
+                ctx.shadowColor = '#ca8a04';
+                ctx.beginPath();
+                ctx.arc(0, 0, ball.radius, 0, Math.PI*2);
+                ctx.fill();
+                ctx.strokeStyle = '#713f12';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            } 
+            else if (equippedSkin === 'matrix') {
+                ctx.fillStyle = '#0f172a';
+                ctx.shadowBlur = 16;
+                ctx.shadowColor = '#06b6d4';
+                ctx.beginPath();
+                ctx.arc(0, 0, ball.radius, 0, Math.PI*2);
+                ctx.fill();
+                ctx.strokeStyle = '#06b6d4';
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(-ball.radius, 0); ctx.lineTo(ball.radius, 0);
+                ctx.moveTo(0, -ball.radius); ctx.lineTo(0, ball.radius);
                 ctx.stroke();
             }
+
             ctx.restore();
         }
 
@@ -319,7 +625,6 @@
                 ctx.save();
                 ctx.shadowBlur = 8;
                 ctx.shadowColor = '#ef4444';
-                
                 ctx.fillStyle = '#ef4444';
                 ctx.fillRect(obs.x + 12, obs.goalieY, obs.goalieWidth, obs.goalieHeight);
                 ctx.strokeStyle = '#ffffff';
@@ -340,6 +645,35 @@
                 ctx.stroke();
                 ctx.restore();
             });
+
+            coins.forEach(c => {
+                if (c.collected) return;
+                c.pulse += 0.08;
+                let scaleX = Math.abs(Math.sin(c.pulse));
+
+                ctx.save();
+                ctx.translate(c.x, c.y);
+                ctx.scale(scaleX, 1);
+                
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#fbbf24';
+                ctx.fillStyle = '#fbbf24';
+                ctx.strokeStyle = '#d97706';
+                ctx.lineWidth = 2;
+                
+                ctx.beginPath();
+                ctx.arc(0, 0, c.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                
+                ctx.fillStyle = '#f59e0b';
+                ctx.font = 'bold 10px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('$', 0, 0);
+                
+                ctx.restore();
+            });
         }
 
         function drawPitchGrass() {
@@ -354,43 +688,48 @@
         function drawUIPanels() {
             if (!gameStarted && !gameOver) {
                 ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
-                ctx.fillRect(40, 140, canvas.width - 80, 210);
+                ctx.fillRect(40, 120, canvas.width - 80, 210);
                 ctx.strokeStyle = '#10b981';
                 ctx.lineWidth = 2;
-                ctx.strokeRect(40, 140, canvas.width - 80, 210);
+                ctx.strokeRect(40, 120, canvas.width - 80, 210);
 
                 ctx.fillStyle = '#ffffff';
                 ctx.font = '900 20px sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText('ENTER THE ARENA', canvas.width / 2, 185);
+                ctx.fillText('ENTER THE ARENA', canvas.width / 2, 165);
                 
                 ctx.fillStyle = '#94a3b8';
                 ctx.font = '13px sans-serif';
-                ctx.fillText('Tap Center to Kick Up', canvas.width / 2, 215);
-                ctx.fillText('Tap Left/Right edges to DASH', canvas.width / 2, 240);
+                ctx.fillText('Tap Center to Kick Up', canvas.width / 2, 195);
+                ctx.fillText('Tap Left/Right edges to DASH', canvas.width / 2, 220);
 
-                ctx.fillStyle = 'rgba(6, 182, 212, 0.5)';
+                ctx.fillStyle = '#fbbf24';
+                ctx.font = 'bold 12px sans-serif';
+                ctx.fillText('🏆 Beat the bots to climb the leaderboard!', canvas.width / 2, 265);
+                ctx.fillStyle = '#06b6d4';
                 ctx.font = '11px sans-serif';
-                ctx.fillText('⬅️ Tap Left edge to dash left', canvas.width / 2, 275);
-                ctx.fillText('Tap Right edge to dash right ➡️', canvas.width / 2, 295);
+                ctx.fillText('Your friends can lock their names here too!', canvas.width / 2, 290);
             }
 
             if (gameOver) {
                 ctx.fillStyle = 'rgba(9, 13, 22, 0.92)';
-                ctx.fillRect(50, 160, canvas.width - 100, 160);
+                ctx.fillRect(50, 140, canvas.width - 100, 160);
                 ctx.strokeStyle = '#ef4444';
-                ctx.strokeRect(50, 160, canvas.width - 100, 160);
+                ctx.strokeRect(50, 140, canvas.width - 100, 160);
                 
                 ctx.fillStyle = '#ef4444';
                 ctx.font = '900 24px sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText('SAVED! MATCH OVER', canvas.width / 2, 205);
+                ctx.fillText('SAVED! MATCH OVER', canvas.width / 2, 185);
 
                 ctx.font = 'bold 15px sans-serif';
                 ctx.fillStyle = '#ffffff';
-                ctx.fillText(`Final Goals Scored: ${score}`, canvas.width / 2, 245);
+                ctx.fillText(`Final Goals Scored: ${score}`, canvas.width / 2, 225);
                 ctx.fillStyle = '#fbbf24';
-                ctx.fillText('Tap Center to retry', canvas.width / 2, 285);
+                ctx.fillText('Tap Center to retry', canvas.width / 2, 265);
+                
+                // Fire off leaderboard score checker routine
+                checkLeaderboardEligibility();
             }
         }
 
@@ -402,7 +741,6 @@
                 ball.velocity += ball.gravity;
                 ball.y += ball.velocity;
                 
-                // Process smooth deceleration for horizontal dash mechanics
                 ball.x += ball.xVelocity;
                 ball.rotation += 0.05 + (ball.xVelocity * 0.03);
 
@@ -411,7 +749,6 @@
                 } else if (keys.curveRight) {
                     ball.xVelocity = 2.2;
                 } else {
-                    // Friction pulls the ball back to center default alignment when released
                     ball.xVelocity *= 0.88;
                     if (Math.abs(ball.xVelocity) < 0.1) ball.xVelocity = 0;
                     
@@ -437,7 +774,7 @@
                     }
 
                     if (!obs.passed && obs.x + obstacleWidth < ball.x) {
-                        score += 1 * comboMultiplier;
+                        score += 1;
                         document.getElementById('current-score').innerText = score;
                         obs.passed = true;
 
@@ -472,16 +809,27 @@
                     let dist = Math.hypot(ball.x - t.x, ball.y - t.y);
                     if(!t.hit && dist < ball.radius + t.radius) {
                         t.hit = true;
-                        comboMultiplier = 2;
-                        document.getElementById('score-mult').innerText = "x2 (HOT!)";
-                        
-                        setTimeout(() => {
-                            comboMultiplier = 1;
-                            document.getElementById('score-mult').innerText = "x1";
-                        }, 3500);
+                        totalCoins += 2;
+                        document.getElementById('coin-count').innerText = totalCoins;
+                        try { localStorage.setItem('ftbTotalCoins', totalCoins); } catch(e){}
                     }
 
                     if(t.x + 30 < 0) targets.splice(i, 1);
+                }
+
+                for (let i = coins.length - 1; i >= 0; i--) {
+                    let c = coins[i];
+                    c.x -= obstacleSpeed;
+
+                    let dist = Math.hypot(ball.x - c.x, ball.y - c.y);
+                    if (!c.collected && dist < ball.radius + c.radius) {
+                        c.collected = true;
+                        totalCoins += 1;
+                        document.getElementById('coin-count').innerText = totalCoins;
+                        try { localStorage.setItem('ftbTotalCoins', totalCoins); } catch(e){}
+                    }
+
+                    if (c.x + 30 < 0) coins.splice(i, 1);
                 }
 
                 if (ball.y + ball.radius >= canvas.height - 40) {
@@ -501,6 +849,9 @@
             requestAnimationFrame(executionLoop);
         }
 
+        // Initialize setup on window load
+        updateShopUI();
+        updateLeaderboardUI();
         executionLoop();
     </script>
 </body>
