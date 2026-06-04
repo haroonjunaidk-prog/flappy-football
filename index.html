@@ -39,6 +39,7 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             overflow: hidden;
             background: #3b82f6;
+            cursor: pointer;
         }
 
         canvas {
@@ -49,7 +50,7 @@
             z-index: 1;
         }
 
-        /* Frosted Glass UI Overlay - Allows the bright blue sky to show through perfectly */
+        /* Frosted Glass UI Overlay - Preserves the vibrant stadium sky backdrop */
         .ui-layer {
             position: absolute;
             top: 0;
@@ -93,7 +94,7 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        /* Dashboard Menu Grid */
+        /* Dashboard Menu Grid Layout */
         .menu-grid {
             display: grid;
             grid-template-columns: 1.10fr 0.90fr;
@@ -126,7 +127,7 @@
         .option-card h3 { font-size: 1.1rem; margin-bottom: 2px; }
         .option-card p { font-size: 0.8rem; color: #f1f5f9; }
 
-        /* Leaderboard Box */
+        /* Leaderboard Box styling */
         .leaderboard-container {
             background: rgba(15, 23, 42, 0.4);
             border: 2px solid rgba(255, 255, 255, 0.2);
@@ -161,7 +162,7 @@
             background: rgba(59, 130, 246, 0.4);
         }
 
-        /* Profile Selection Input */
+        /* Profile Selection Field */
         #username-field {
             background: rgba(15, 23, 42, 0.6);
             border: 2px solid rgba(255, 255, 255, 0.3);
@@ -176,7 +177,7 @@
         }
         #username-field:focus { border-color: #ffffff; }
 
-        /* Stage Map View */
+        /* Stage Mode Selection Nodes */
         .stages-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -203,7 +204,7 @@
         .stage-node h4 { font-size: 1.2rem; }
         .stage-node span { font-size: 0.75rem; color: #fcd34d; font-weight: bold; }
 
-        /* Dynamic HUD Bar overlaying gameplay directly */
+        /* HUD Overlay Display */
         #game-hud {
             position: absolute;
             top: 15px;
@@ -316,7 +317,7 @@
 </div>
 
 <script>
-    // --- PERSISTENCE AND SEED MOCK REGISTRY ---
+    // --- STORAGE STATE REGISTRY & BOT RECORDS ---
     const MOCK_BOARD = [
         { name: "🐐 MESSI BOT", score: 15, system: true },
         { name: "🤖 RONALDO BOT", score: 12, system: true },
@@ -334,8 +335,9 @@
 
     const canvas = document.getElementById('arenaCanvas');
     const ctx = canvas.getContext('2d');
+    const gameBox = document.getElementById('game-box');
 
-    // Solid Non-Glitching Balancing Constants
+    // Engine Core System Balancers
     const BALANCER = {
         gravity: 0.22,
         jumpForce: -5.5,
@@ -343,24 +345,23 @@
         spacing: 220,
         gapSize: 165,
         ballSize: 13,
-        cushion: 3.5 // Smooth hitbox visual tolerance buffer
+        cushion: 3.5 // Continuous hitbox tolerance margin to eliminate frame glitches
     };
 
     let animationFrameId = null;
     let isRunning = false;
-    let currentMode = 'endless'; // 'endless' or 'stages'
+    let currentMode = 'endless'; 
     let currentStage = 1;
 
-    // Entity State Elements
+    // Entity Model Metrics
     let ball = {};
     let posts = [];
     let keeper = {};
     let score = 0;
     let particles = [];
 
-    // --- APPLICATION START AND ROUTING HANDLERS ---
+    // --- BOOT AND ROUTING MANAGEMENT ---
     function initStadiumApp() {
-        // Draw background scenery immediately once so the sky is fully visible from boot up
         renderStaticBackgroundScenery();
         
         if (!session.player) {
@@ -411,7 +412,7 @@
         });
     }
 
-    // --- NAVIGATION TRAVERSALS ---
+    // --- NAVIGATION CONTROLLER ACTION INTERFACES ---
     document.getElementById('opt-endless').addEventListener('click', (e) => {
         e.stopPropagation();
         currentMode = 'endless';
@@ -449,9 +450,9 @@
         setupMatchSession();
     });
 
-    // --- CORE GAME ENGINE AND LIFECYCLE ---
+    // --- ENGINE CONTROL LOOPS & GLOBALIZED DUAL CONTROLS ---
     function setupMatchSession() {
-        popUI(null); // Hide all menus, show naked canvas loop
+        popUI(null); 
         document.getElementById('game-hud').classList.remove('hidden');
 
         score = 0;
@@ -460,11 +461,9 @@
         isRunning = true;
 
         ball = {
-            x: 130,
-            y: 180,
+            x: 130, y: 180,
             radius: BALANCER.ballSize,
-            velocity: 0,
-            angle: 0
+            velocity: 0, angle: 0
         };
 
         keeper = {
@@ -476,7 +475,6 @@
 
         refreshHUDDisplay();
 
-        // Spawn layout anchors forward smoothly
         spawnGoalpostUnit(460);
         spawnGoalpostUnit(460 + BALANCER.spacing);
 
@@ -484,20 +482,39 @@
         animationFrameId = requestAnimationFrame(engineProcessingCore);
     }
 
-    // ONE SINGLE GLOBAL CONTROLLER EVENT TO PREVENT LOCKING UP OR MULTIPLE ATTACHMENTS
-    window.removeEventListener('keydown', processJumpAction);
-    window.addEventListener('keydown', processJumpAction);
-    canvas.removeEventListener('mousedown', processCanvasClickAction);
-    canvas.addEventListener('mousedown', processCanvasClickAction);
+    // COMPLETE KEYBOARD MAPPING RESTORATION
+    window.removeEventListener('keydown', executeGlobalJumpAction);
+    window.addEventListener('keydown', executeGlobalJumpAction);
 
-    function processJumpAction(e) {
-        if ((e.code === 'Space' || e.code === 'ArrowUp') && isRunning) {
+    gameBox.removeEventListener('mousedown', executeClickJumpAction);
+    gameBox.addEventListener('mousedown', executeClickJumpAction);
+
+    gameBox.removeEventListener('touchstart', executeTouchJumpAction);
+    gameBox.addEventListener('touchstart', executeTouchJumpAction, { passive: false });
+
+    function executeGlobalJumpAction(e) {
+        // Explicitly list all valid layout options: Space, KeyA, or Any Arrow key configurations
+        const isArrowKey = e.key.startsWith('Arrow');
+        const isAKey = e.code === 'KeyA' || e.key === 'a' || e.key === 'A';
+        const isSpaceKey = e.code === 'Space';
+
+        if ((isSpaceKey || isArrowKey || isAKey) && isRunning) {
             e.preventDefault();
             ball.velocity = BALANCER.jumpForce;
         }
     }
-    function processCanvasClickAction() {
-        if (isRunning) ball.velocity = BALANCER.jumpForce;
+
+    function executeClickJumpAction(e) {
+        if (isRunning) {
+            ball.velocity = BALANCER.jumpForce;
+        }
+    }
+
+    function executeTouchJumpAction(e) {
+        if (isRunning) {
+            e.preventDefault(); 
+            ball.velocity = BALANCER.jumpForce;
+        }
     }
 
     function spawnGoalpostUnit(targetX) {
@@ -536,29 +553,25 @@
         animationFrameId = requestAnimationFrame(engineProcessingCore);
     }
 
-    // --- GAMEPLAY SYSTEM LAWS & PHYSICS ---
+    // --- GAME ENGINE PHYSICS & INTELLIGENT KEEPER NERF BALANCE ---
     function updateEntitiesLogic() {
-        // 1. Structural Environment Gravity Applied
         ball.velocity += BALANCER.gravity;
         ball.y += ball.velocity;
         ball.angle += 0.06;
 
-        // Boundaries Crash Validation Check
         if (ball.y + ball.radius > canvas.height - 40 || ball.y - ball.radius < 0) {
             terminateMatchSession(false);
             return;
         }
 
-        // Identify the localized nearest upcoming post
         let nearestPost = posts.find(p => p.x + 55 > ball.x - ball.radius);
 
-        // 2. Intelligent Goalkeeper Adaptive Phase Routing Setup
         evaluateGoalkeeperAIBehavior(nearestPost);
 
         if (keeper.active) {
             if (keeper.mode === 'tracking') {
                 let deltaY = ball.y - keeper.y - (keeper.height / 2);
-                keeper.y += Math.sign(deltaY) * Math.min(Math.abs(deltaY), 1.6); // Eased vertical follow tracking speed
+                keeper.y += Math.sign(deltaY) * Math.min(Math.abs(deltaY), 0.95); 
                 
                 if (keeper.y < 10) keeper.y = 10;
                 if (keeper.y + keeper.height > canvas.height - 48) keeper.y = canvas.height - 48 - keeper.height;
@@ -566,18 +579,16 @@
                 keeper.y += keeper.speed * keeper.direction;
                 if (nearestPost) {
                     if (keeper.y < nearestPost.topHeight + 3 || keeper.y + keeper.height > nearestPost.bottomY - 3) {
-                        keeper.direction *= -1; // Bounce back inside empty passage tunnel gap
+                        keeper.direction *= -1; 
                     }
                 }
             }
         }
 
-        // 3. Goalposts Forward Progression & Precision Hitbox Calculations
         for (let i = posts.length - 1; i >= 0; i--) {
             let targetP = posts[i];
             targetP.x -= BALANCER.forwardSpeed;
 
-            // Box Clipping Metrics using Cushion Tolerance to bypass frame-skipping glitches
             let bL = ball.x - ball.radius + BALANCER.cushion;
             let bR = ball.x + ball.radius - BALANCER.cushion;
             let bT = ball.y - ball.radius + BALANCER.cushion;
@@ -590,7 +601,6 @@
                 }
             }
 
-            // Accurate Point Passage Allocation
             if (!targetP.scored && targetP.x + 25 < ball.x) {
                 targetP.scored = true;
                 score++;
@@ -599,11 +609,9 @@
                 evaluateStageVictoryParameters();
             }
 
-            // Splice out old pipes cleanly going backwards inside safety cycle index
             if (targetP.x < -70) posts.splice(i, 1);
         }
 
-        // 4. Live Keeper Collision Clipping Check
         if (keeper.active) {
             let bL = ball.x - ball.radius + BALANCER.cushion;
             let bR = ball.x + ball.radius - BALANCER.cushion;
@@ -618,12 +626,10 @@
             }
         }
 
-        // Seamless Procedural Generation Buffer
         if (posts[posts.length - 1].x < canvas.width - BALANCER.spacing) {
             spawnGoalpostUnit(canvas.width);
         }
 
-        // 5. Update Explosion Particles backwards safely to prevent skipping indices
         for (let i = particles.length - 1; i >= 0; i--) {
             let pt = particles[i];
             pt.x += pt.vX; pt.y += pt.vY; pt.alpha -= pt.decay;
@@ -638,12 +644,10 @@
             if (score <= 10) {
                 keeper.active = false;
             } else if (score <= 20) {
-                // Phase 2: Open midfield patrol tracking ball height outside goal line bounds
                 keeper.active = true;
                 keeper.mode = 'tracking';
-                keeper.x = nearestPost.x - 90;
+                keeper.x = nearestPost.x - 110; 
             } else {
-                // Phase 3: Vertical pacing moving box wall right inside the mouth
                 keeper.active = true;
                 if (keeper.mode !== 'vertical') {
                     keeper.mode = 'vertical';
@@ -653,13 +657,12 @@
                 keeper.x = nearestPost.x + 12;
             }
         } else {
-            // Campaign Fixed Direct Stage Assignments
             if (currentStage === 1) {
                 keeper.active = false;
             } else if (currentStage === 2) {
                 keeper.active = true;
                 keeper.mode = 'tracking';
-                keeper.x = nearestPost.x - 90;
+                keeper.x = nearestPost.x - 110; 
             } else {
                 keeper.active = true;
                 if (keeper.mode !== 'vertical') {
@@ -710,7 +713,7 @@
         if (isWinnerOutcome) {
             head.innerHTML = "🏆 STAGE CLEARED";
             stats.innerHTML = `Completed Stage ${currentStage} at ${score} Goals!`;
-            alertBar.innerText = currentStage === 3 ? "👑 CHUB CHALLENGE COMPLETE - YOU ARE THE GOAT!" : "Next tactical stage tier unlocked successfully.";
+            alertBar.innerText = currentStage === 3 ? "👑 CAMPAIGN COMPLETE - YOU ARE THE GOAT!" : "Next tactical stage tier unlocked successfully.";
         } else {
             head.innerHTML = "FULL TIME";
             stats.innerText = `Final Score: ${score} Goals`;
@@ -742,50 +745,44 @@
         return tracking;
     }
 
-    // --- VISUAL GRAPHICS RENDERING SYSTEM ---
+    // --- CLASSIC VISUAL RENDERING SCENERY SYSTEMS ---
     function renderStaticBackgroundScenery() {
-        // Clear Sky Daylight Gradient Setup
         let skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        skyGradient.addColorStop(0, '#1d4ed8');   // Rich deeper blue top
-        skyGradient.addColorStop(0.5, '#3b82f6'); // Solid stadium blue midpoint
-        skyGradient.addColorStop(0.9, '#60a5fa'); // Vibrant sky light base glow
+        skyGradient.addColorStop(0, '#1d4ed8');   
+        skyGradient.addColorStop(0.5, '#3b82f6'); 
+        skyGradient.addColorStop(0.9, '#60a5fa'); 
         ctx.fillStyle = skyGradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Alternating Striped Pitch Grass Tiers at base bounds
         let grassBaseY = canvas.height - 40;
         for (let horizontalX = 0; horizontalX < canvas.width; horizontalX += 40) {
             ctx.fillStyle = (horizontalX / 40 % 2 === 0) ? '#16a34a' : '#15803d';
             ctx.fillRect(horizontalX, grassBaseY, 40, 40);
         }
 
-        // Clean Solid Touchline Field Boundary White Accent Stripe
         ctx.fillStyle = 'rgba(255,255,255,0.6)';
         ctx.fillRect(0, grassBaseY, canvas.width, 3);
     }
 
     function renderActiveGraphicsLayers() {
-        // Draw static baseline layer environment elements
         renderStaticBackgroundScenery();
 
-        // 1. Draw Moving Structural Goalposts (Pipes)
+        // 1. Draw Moving Structural White Goalposts (Pipes)
         posts.forEach(p => {
             let postColorGrad = ctx.createLinearGradient(p.x, 0, p.x + 55, 0);
             postColorGrad.addColorStop(0, '#f1f5f9');
             postColorGrad.addColorStop(0.4, '#ffffff');
             postColorGrad.addColorStop(1, '#cbd5e1');
 
-            // Top White Goal Line Structure Post
             ctx.fillStyle = postColorGrad;
             ctx.fillRect(p.x, 0, 55, p.topHeight);
             ctx.fillStyle = '#93c5fd';
-            ctx.fillRect(p.x - 1, p.topHeight - 4, 57, 4); // Highlight cap line
+            ctx.fillRect(p.x - 1, p.topHeight - 4, 57, 4); 
 
-            // Bottom White Goal Line Structure Post
             ctx.fillStyle = postColorGrad;
             ctx.fillRect(p.x, p.bottomY, 55, canvas.height - p.bottomY - 40);
             ctx.fillStyle = '#93c5fd';
-            ctx.fillRect(p.x - 1, p.bottomY, 57, 4); // Highlight cap line
+            ctx.fillRect(p.x - 1, p.bottomY, 57, 4); 
         });
 
         // 2. Draw Active Goalkeeper Kits
@@ -793,18 +790,16 @@
             ctx.fillStyle = keeper.mode === 'tracking' ? '#06b6d4' : '#ef4444';
             ctx.fillRect(keeper.x, keeper.y, keeper.width, keeper.height);
 
-            // Clean White Striped Kit Trim
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(keeper.x + 4, keeper.y, 4, keeper.height);
             ctx.fillRect(keeper.x + keeper.width - 8, keeper.y, 4, keeper.height);
 
-            // Colored Goalkeeper Gloves
             ctx.fillStyle = '#f59e0b';
             ctx.fillRect(keeper.x - 3, keeper.y + 12, 3, 8);
             ctx.fillRect(keeper.x + keeper.width, keeper.y + 12, 3, 8);
         }
 
-        // 3. Draw High-Contrast Classic Pentagonal Soccer Ball
+        // 3. Draw High-Contrast Classic Match Soccer Ball
         ctx.save();
         ctx.translate(ball.x, ball.y);
         ctx.rotate(ball.angle);
@@ -825,7 +820,7 @@
         }
         ctx.restore();
 
-        // 4. Render Active Floating Score Burst Particles
+        // 4. Render Active Goal Blast Particles
         particles.forEach(pt => {
             ctx.save();
             ctx.globalAlpha = pt.alpha;
@@ -837,7 +832,6 @@
         });
     }
 
-    // Launch Application Lifecycle immediately on load
     initStadiumApp();
 </script>
 
