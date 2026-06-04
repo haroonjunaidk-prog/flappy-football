@@ -38,7 +38,7 @@
             background: radial-gradient(circle at center, #1e1b4b 0%, #090d16 100%);
             touch-action: none;
             padding: 15px 10px;
-            overflow-y: auto; /* Allows scrolling down through shop & leaderboard */
+            overflow-y: auto;
         }
 
         .game-container {
@@ -60,9 +60,7 @@
             text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
         }
 
-        h1 span {
-            color: var(--accent-green);
-        }
+        h1 span { color: var(--accent-green); }
 
         .scoreboard {
             display: flex;
@@ -95,7 +93,6 @@
             aspect-ratio: 450 / 480;
         }
 
-        /* DUAL LOCKER ROOM SHOP PANEL */
         .shop-panel, .leaderboard-panel {
             width: 100%;
             background: rgba(15, 23, 42, 0.95);
@@ -175,7 +172,6 @@
         .shop-card.active .shop-btn { background: var(--accent-green); }
         .shop-btn.buyable { background: var(--gold); color: #0f172a; }
 
-        /* ARCADE LEADERBOARD PANEL LAYOUT */
         .leaderboard-list {
             display: flex;
             flex-direction: column;
@@ -252,8 +248,7 @@
                 <span>🏆 TOP 5 STRIKERS</span>
                 <span style="font-size:10px; color:var(--neon-blue);">Device Records</span>
             </div>
-            <div class="leaderboard-list" id="leaderboard-display">
-                </div>
+            <div class="leaderboard-list" id="leaderboard-display"></div>
         </div>
 
         <div class="controls-hint">
@@ -265,13 +260,12 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Persistent Profile Memory Data System
         let highScore = 0;
         let totalCoins = 0;
         let equippedSkin = 'classic';
         let unlockedSkins = ['classic'];
+        let playerName = null;
         
-        // Load Leaderboard data or set default arcade target bots
         let leaderboard = [
             { name: "Ronaldo Bot", score: 12 },
             { name: "Messi Bot", score: 9 },
@@ -284,6 +278,7 @@
             highScore = parseInt(localStorage.getItem('ftbHighScore')) || 0; 
             totalCoins = parseInt(localStorage.getItem('ftbTotalCoins')) || 0;
             equippedSkin = localStorage.getItem('ftbEquippedSkin') || 'classic';
+            playerName = localStorage.getItem('ftbPlayerName') || null;
             
             let savedSkins = JSON.parse(localStorage.getItem('ftbUnlockedSkins'));
             if(savedSkins) unlockedSkins = savedSkins;
@@ -300,17 +295,10 @@
         let score = 0;
         let gameStarted = false;
         let gameOver = false;
-        let leaderboardChecked = false; // Flag to prevent multiple name prompts in one loop
+        let leaderboardChecked = false;
 
         const ball = {
-            x: 100,
-            y: 200,
-            radius: 13,
-            gravity: 0.36,
-            lift: -6.8,
-            velocity: 0,
-            xVelocity: 0,
-            rotation: 0
+            x: 100, y: 200, radius: 13, gravity: 0.36, lift: -6.8, velocity: 0, xVelocity: 0, rotation: 0
         };
 
         let obstacles = [];
@@ -318,25 +306,16 @@
         let coins = [];
         
         const obstacleWidth = 45;
-        const obstacleGap = 165; 
-        let obstacleSpeed = 2.6;
+        const obstacleGap = 175; // EASIER: Widened goal mouth gap from 165 to 175
+        let obstacleSpeed = 2.2; // EASIER: Dropped base post speed from 2.6 to 2.2
         let spawnTimer = 0;
 
         let keys = { curveLeft: false, curveRight: false };
 
         window.addEventListener('keydown', e => {
-            if (e.key === 'ArrowLeft' || e.key === 'a') {
-                keys.curveLeft = true;
-                ball.xVelocity = -3.5;
-            }
-            if (e.key === 'ArrowRight' || e.key === 'd') {
-                keys.curveRight = true;
-                ball.xVelocity = 3.5;
-            }
-            if (e.key === ' ' || e.code === 'Space') {
-                e.preventDefault();
-                juggleBall();
-            }
+            if (e.key === 'ArrowLeft' || e.key === 'a') { keys.curveLeft = true; ball.xVelocity = -3.5; }
+            if (e.key === 'ArrowRight' || e.key === 'd') { keys.curveRight = true; ball.xVelocity = 3.5; }
+            if (e.key === ' ' || e.code === 'Space') { e.preventDefault(); juggleBall(); }
         });
         window.addEventListener('keyup', e => {
             if (e.key === 'ArrowLeft' || e.key === 'a') keys.curveLeft = false;
@@ -345,36 +324,24 @@
 
         function handlePointerStart(clientX) {
             if (gameOver) { resetGame(); return; }
-            
             const rect = canvas.getBoundingClientRect();
             const relativeX = clientX - rect.left;
-            const canvasWidthVisual = rect.width;
-
-            if (relativeX < canvasWidthVisual * 0.23) {
-                keys.curveLeft = true;
-                ball.xVelocity = -4.0;
+            
+            if (relativeX < rect.width * 0.23) {
+                keys.curveLeft = true; ball.xVelocity = -4.0;
                 if (!gameStarted) gameStarted = true;
-            } else if (relativeX > canvasWidthVisual * 0.77) {
-                keys.curveRight = true;
-                ball.xVelocity = 4.0;
+            } else if (relativeX > rect.width * 0.77) {
+                keys.curveRight = true; ball.xVelocity = 4.0;
                 if (!gameStarted) gameStarted = true;
             } else {
                 juggleBall();
             }
         }
 
-        function handlePointerEnd() {
-            keys.curveLeft = false;
-            keys.curveRight = false;
-        }
-
+        function handlePointerEnd() { keys.curveLeft = false; keys.curveRight = false; }
         canvas.addEventListener('mousedown', e => handlePointerStart(e.clientX));
         window.addEventListener('mouseup', handlePointerEnd);
-
-        canvas.addEventListener('touchstart', e => {
-            e.preventDefault();
-            handlePointerStart(e.touches[0].clientX);
-        }, { passive: false });
+        canvas.addEventListener('touchstart', e => { e.preventDefault(); handlePointerStart(e.touches[0].clientX); }, { passive: false });
         window.addEventListener('touchend', handlePointerEnd);
 
         function juggleBall() {
@@ -383,21 +350,16 @@
             ball.velocity = ball.lift;
         }
 
-        // Shop UI Sync Mechanics
         function updateShopUI() {
             const skinIds = ['classic', 'fire', 'gold', 'matrix'];
             skinIds.forEach(id => {
                 const card = document.getElementById(`skin-${id}`);
                 const btn = document.getElementById(`btn-${id}`);
                 card.classList.remove('active');
-                
                 if (equippedSkin === id) {
-                    card.classList.add('active');
-                    btn.innerText = "Active";
-                    btn.className = "shop-btn";
+                    card.classList.add('active'); btn.innerText = "Active"; btn.className = "shop-btn";
                 } else if (unlockedSkins.includes(id)) {
-                    btn.innerText = "Equip";
-                    btn.className = "shop-btn";
+                    btn.innerText = "Equip"; btn.className = "shop-btn";
                 } else {
                     btn.innerText = `💰 ${skinPrices[id]}`;
                     btn.className = totalCoins >= skinPrices[id] ? "shop-btn buyable" : "shop-btn";
@@ -410,9 +372,8 @@
                 equippedSkin = id;
                 try { localStorage.setItem('ftbEquippedSkin', id); } catch(e){}
             } else {
-                const cost = skinPrices[id];
-                if (totalCoins >= cost) {
-                    totalCoins -= cost;
+                if (totalCoins >= skinPrices[id]) {
+                    totalCoins -= skinPrices[id];
                     unlockedSkins.push(id);
                     equippedSkin = id;
                     document.getElementById('coin-count').innerText = totalCoins;
@@ -426,45 +387,43 @@
             updateShopUI();
         }
 
-        // Leaderboard Visual Render System
         function updateLeaderboardUI() {
             const container = document.getElementById('leaderboard-display');
             container.innerHTML = '';
             
-            // Sort high scores high to low
             leaderboard.sort((a, b) => b.score - a.score);
-            // Limit leaderboard profile array to Top 5 elements
             leaderboard = leaderboard.slice(0, 5);
             try { localStorage.setItem('ftbLeaderboard', JSON.stringify(leaderboard)); } catch(e){}
 
             leaderboard.forEach((entry, index) => {
-                const rank = index + 1;
-                let rankClass = '';
-                if (rank === 1) rankClass = 'rank-1';
-                if (rank === 2) rankClass = 'rank-2';
-                if (rank === 3) rankClass = 'rank-3';
-
+                const rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : '';
                 const row = document.createElement('div');
                 row.className = `leaderboard-row ${rankClass}`;
-                row.innerHTML = `<span>#${rank} ${entry.name}</span><span>${entry.score} Goals</span>`;
+                row.innerHTML = `<span>#${index + 1} ${entry.name}</span><span>${entry.score} Goals</span>`;
                 container.appendChild(row);
             });
         }
 
-        // Check if the final score qualifies for the leaderboard
         function checkLeaderboardEligibility() {
             if (leaderboardChecked) return;
-            
-            const lowestScore = leaderboard.length >= 5 ? leaderboard[leaderboard.length - 1].score : -1;
-            
-            if (score > lowestScore && score > 0) {
-                // Short timeout to let the Game Over screen draw completely first
-                setTimeout(() => {
-                    let initials = prompt("🔥 NEW RECORD OVERTAKE! Enter your name or initials (Max 12 chars):");
-                    if (!initials || initials.trim() === "") initials = "Anonymous";
-                    initials = initials.substring(0, 12).toUpperCase();
+            let lowestScore = leaderboard.length >= 5 ? leaderboard[leaderboard.length - 1].score : -1;
+            let existingIndex = leaderboard.findIndex(entry => entry.name === playerName);
 
-                    leaderboard.push({ name: initials, score: score });
+            if (existingIndex !== -1) {
+                if (score > leaderboard[existingIndex].score) {
+                    leaderboard[existingIndex].score = score;
+                    updateLeaderboardUI();
+                }
+                leaderboardChecked = true;
+            } else if (score > lowestScore && score > 0) {
+                setTimeout(() => {
+                    if (!playerName) {
+                        let initials = prompt("🔥 NEW RECORD! Enter your name (Max 12 chars):");
+                        if (!initials || initials.trim() === "") initials = "Player1";
+                        playerName = initials.substring(0, 12).toUpperCase();
+                        try { localStorage.setItem('ftbPlayerName', playerName); } catch(e){}
+                    }
+                    leaderboard.push({ name: playerName, score: score });
                     leaderboardChecked = true;
                     updateLeaderboardUI();
                 }, 500);
@@ -477,202 +436,85 @@
             const pad = 65;
             const openSpace = canvas.height - obstacleGap - pad - 40;
             const topHeight = Math.floor(Math.random() * openSpace) + pad;
-
             const goalieHeight = 48;
             const goalieMinY = topHeight + 5;
             const goalieMaxY = topHeight + obstacleGap - goalieHeight - 5;
 
             obstacles.push({
-                x: canvas.width,
-                top: topHeight,
-                passed: false,
+                x: canvas.width, top: topHeight, passed: false,
                 goalieY: topHeight + (obstacleGap / 2) - (goalieHeight / 2),
                 goalieDir: Math.random() > 0.5 ? 1 : -1,
-                goalieSpeed: 1.9,
-                goalieHeight: goalieHeight,
-                goalieWidth: 16,
-                minY: goalieMinY,
-                maxY: goalieMaxY
+                goalieSpeed: 1.4, // EASIER: Slowed down goalie velocity from 1.9 to 1.4
+                goalieHeight: goalieHeight, goalieWidth: 16,
+                minY: goalieMinY, maxY: goalieMaxY
             });
 
             const targetY = topHeight + (obstacleGap / 2) + (Math.random() * 40 - 20);
-            targets.push({
-                x: canvas.width + obstacleWidth / 2,
-                y: targetY,
-                radius: 18,
-                hit: false
-            });
-
-            coins.push({
-                x: canvas.width + obstacleWidth / 2 + 55,
-                y: targetY + (Math.random() * 20 - 10),
-                radius: 9,
-                collected: false,
-                pulse: Math.random() * 5
-            });
+            targets.push({ x: canvas.width + obstacleWidth / 2, y: targetY, radius: 18, hit: false });
+            coins.push({ x: canvas.width + obstacleWidth / 2 + 55, y: targetY + (Math.random() * 20 - 10), radius: 9, collected: false, pulse: Math.random() * 5 });
         }
 
         function resetGame() {
-            ball.y = 200;
-            ball.x = 100;
-            ball.velocity = 0;
-            ball.xVelocity = 0;
-            ball.rotation = 0;
-            obstacles = [];
-            targets = [];
-            coins = [];
-            score = 0;
-            obstacleSpeed = 2.6;
+            ball.y = 200; ball.x = 100; ball.velocity = 0; ball.xVelocity = 0; ball.rotation = 0;
+            obstacles = []; targets = []; coins = []; score = 0; obstacleSpeed = 2.2;
             document.getElementById('current-score').innerText = score;
-            gameOver = false;
-            gameStarted = false;
-            leaderboardChecked = false;
-            spawnTimer = 0;
+            gameOver = false; gameStarted = false; leaderboardChecked = false; spawnTimer = 0;
             updateShopUI();
         }
 
         function drawFootball() {
-            ctx.save();
-            ctx.translate(ball.x, ball.y);
-            ctx.rotate(ball.rotation);
+            ctx.save(); ctx.translate(ball.x, ball.y); ctx.rotate(ball.rotation);
 
             if (equippedSkin === 'classic') {
-                ctx.fillStyle = '#ffffff';
-                ctx.beginPath();
-                ctx.arc(0, 0, ball.radius, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = '#020617';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-
-                ctx.fillStyle = '#0f172a';
-                ctx.beginPath();
-                ctx.arc(0, 0, 4, 0, Math.PI*2);
-                ctx.fill();
-                ctx.strokeStyle = '#334155';
-                ctx.lineWidth = 1.2;
-                for(let i=0; i<5; i++) {
-                    let a = (Math.PI*2/5) * i;
-                    ctx.beginPath();
-                    ctx.moveTo(0,0);
-                    ctx.lineTo(Math.cos(a)*ball.radius, Math.sin(a)*ball.radius);
-                    ctx.stroke();
-                }
-            } 
-            else if (equippedSkin === 'fire') {
+                ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(0, 0, ball.radius, 0, Math.PI * 2); ctx.fill();
+                ctx.strokeStyle = '#020617'; ctx.lineWidth = 2; ctx.stroke();
+                ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI*2); ctx.fill();
+                ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.2;
+                for(let i=0; i<5; i++) { let a = (Math.PI*2/5) * i; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(Math.cos(a)*ball.radius, Math.sin(a)*ball.radius); ctx.stroke(); }
+            } else if (equippedSkin === 'fire') {
                 let radG = ctx.createRadialGradient(0,0, 2, 0,0, ball.radius);
-                radG.addColorStop(0, '#fef08a');
-                radG.addColorStop(0.3, '#f97316');
-                radG.addColorStop(1, '#ef4444');
-                ctx.fillStyle = radG;
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = '#f97316';
-                ctx.beginPath();
-                ctx.arc(0, 0, ball.radius, 0, Math.PI*2);
-                ctx.fill();
-            } 
-            else if (equippedSkin === 'gold') {
+                radG.addColorStop(0, '#fef08a'); radG.addColorStop(0.3, '#f97316'); radG.addColorStop(1, '#ef4444');
+                ctx.fillStyle = radG; ctx.shadowBlur = 15; ctx.shadowColor = '#f97316';
+                ctx.beginPath(); ctx.arc(0, 0, ball.radius, 0, Math.PI*2); ctx.fill();
+            } else if (equippedSkin === 'gold') {
                 let goldG = ctx.createLinearGradient(-ball.radius, -ball.radius, ball.radius, ball.radius);
-                goldG.addColorStop(0, '#fef08a');
-                goldG.addColorStop(0.5, '#eab308');
-                goldG.addColorStop(1, '#a16207');
-                ctx.fillStyle = goldG;
-                ctx.shadowBlur = 18;
-                ctx.shadowColor = '#ca8a04';
-                ctx.beginPath();
-                ctx.arc(0, 0, ball.radius, 0, Math.PI*2);
-                ctx.fill();
-                ctx.strokeStyle = '#713f12';
-                ctx.lineWidth = 1;
-                ctx.stroke();
-            } 
-            else if (equippedSkin === 'matrix') {
-                ctx.fillStyle = '#0f172a';
-                ctx.shadowBlur = 16;
-                ctx.shadowColor = '#06b6d4';
-                ctx.beginPath();
-                ctx.arc(0, 0, ball.radius, 0, Math.PI*2);
-                ctx.fill();
-                ctx.strokeStyle = '#06b6d4';
-                ctx.lineWidth = 2.5;
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(-ball.radius, 0); ctx.lineTo(ball.radius, 0);
-                ctx.moveTo(0, -ball.radius); ctx.lineTo(0, ball.radius);
-                ctx.stroke();
+                goldG.addColorStop(0, '#fef08a'); goldG.addColorStop(0.5, '#eab308'); goldG.addColorStop(1, '#a16207');
+                ctx.fillStyle = goldG; ctx.shadowBlur = 18; ctx.shadowColor = '#ca8a04';
+                ctx.beginPath(); ctx.arc(0, 0, ball.radius, 0, Math.PI*2); ctx.fill();
+                ctx.strokeStyle = '#713f12'; ctx.lineWidth = 1; ctx.stroke();
+            } else if (equippedSkin === 'matrix') {
+                ctx.fillStyle = '#0f172a'; ctx.shadowBlur = 16; ctx.shadowColor = '#06b6d4';
+                ctx.beginPath(); ctx.arc(0, 0, ball.radius, 0, Math.PI*2); ctx.fill();
+                ctx.strokeStyle = '#06b6d4'; ctx.lineWidth = 2.5; ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(-ball.radius, 0); ctx.lineTo(ball.radius, 0); ctx.moveTo(0, -ball.radius); ctx.lineTo(0, ball.radius); ctx.stroke();
             }
-
             ctx.restore();
         }
 
         function drawStadiumObstacles() {
             obstacles.forEach(obs => {
                 let gradient = ctx.createLinearGradient(obs.x, 0, obs.x + obstacleWidth, 0);
-                gradient.addColorStop(0, '#e2e8f0');
-                gradient.addColorStop(0.4, '#ffffff');
-                gradient.addColorStop(1, '#94a3b8');
-
-                ctx.fillStyle = gradient;
-                ctx.fillRect(obs.x, 0, obstacleWidth, obs.top);
-                ctx.strokeStyle = '#1e293b';
-                ctx.strokeRect(obs.x, -5, obstacleWidth, obs.top + 5);
-
-                let bottomY = obs.top + obstacleGap;
-                let bottomHeight = canvas.height - bottomY;
-                ctx.fillRect(obs.x, bottomY, obstacleWidth, bottomHeight);
-                ctx.strokeRect(obs.x, bottomY, obstacleWidth, bottomHeight + 5);
-
-                ctx.save();
-                ctx.shadowBlur = 8;
-                ctx.shadowColor = '#ef4444';
-                ctx.fillStyle = '#ef4444';
+                gradient.addColorStop(0, '#e2e8f0'); gradient.addColorStop(0.4, '#ffffff'); gradient.addColorStop(1, '#94a3b8');
+                ctx.fillStyle = gradient; ctx.fillRect(obs.x, 0, obstacleWidth, obs.top);
+                ctx.strokeStyle = '#1e293b'; ctx.strokeRect(obs.x, -5, obstacleWidth, obs.top + 5);
+                let bottomY = obs.top + obstacleGap; let bottomHeight = canvas.height - bottomY;
+                ctx.fillRect(obs.x, bottomY, obstacleWidth, bottomHeight); ctx.strokeRect(obs.x, bottomY, obstacleWidth, bottomHeight + 5);
+                ctx.save(); ctx.shadowBlur = 8; ctx.shadowColor = '#ef4444'; ctx.fillStyle = '#ef4444';
                 ctx.fillRect(obs.x + 12, obs.goalieY, obs.goalieWidth, obs.goalieHeight);
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(obs.x + 12, obs.goalieY, obs.goalieWidth, obs.goalieHeight);
-                ctx.restore();
+                ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1; ctx.strokeRect(obs.x + 12, obs.goalieY, obs.goalieWidth, obs.goalieHeight); ctx.restore();
             });
 
             targets.forEach(t => {
-                if(t.hit) return;
-                ctx.save();
-                ctx.shadowBlur = 12;
-                ctx.shadowColor = '#06b6d4';
-                ctx.strokeStyle = '#06b6d4';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.arc(t.x, t.y, t.radius, 0, Math.PI*2);
-                ctx.stroke();
-                ctx.restore();
+                if(t.hit) return; ctx.save(); ctx.shadowBlur = 12; ctx.shadowColor = '#06b6d4';
+                ctx.strokeStyle = '#06b6d4'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(t.x, t.y, t.radius, 0, Math.PI*2); ctx.stroke(); ctx.restore();
             });
 
             coins.forEach(c => {
-                if (c.collected) return;
-                c.pulse += 0.08;
-                let scaleX = Math.abs(Math.sin(c.pulse));
-
-                ctx.save();
-                ctx.translate(c.x, c.y);
-                ctx.scale(scaleX, 1);
-                
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = '#fbbf24';
-                ctx.fillStyle = '#fbbf24';
-                ctx.strokeStyle = '#d97706';
-                ctx.lineWidth = 2;
-                
-                ctx.beginPath();
-                ctx.arc(0, 0, c.radius, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-                
-                ctx.fillStyle = '#f59e0b';
-                ctx.font = 'bold 10px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('$', 0, 0);
-                
-                ctx.restore();
+                if (c.collected) return; c.pulse += 0.08; let scaleX = Math.abs(Math.sin(c.pulse));
+                ctx.save(); ctx.translate(c.x, c.y); ctx.scale(scaleX, 1);
+                ctx.shadowBlur = 10; ctx.shadowColor = '#fbbf24'; ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#d97706'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(0, 0, c.radius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = '#f59e0b'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('$', 0, 0); ctx.restore();
             });
         }
 
@@ -681,178 +523,106 @@
                 ctx.fillStyle = (i / 40 % 2 === 0) ? '#15803d' : '#166534';
                 ctx.fillRect(i, canvas.height - 40, 40, 40);
             }
-            ctx.fillStyle = 'rgba(255,255,255,0.4)';
-            ctx.fillRect(0, canvas.height - 40, canvas.width, 3);
+            ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fillRect(0, canvas.height - 40, canvas.width, 3);
         }
 
         function drawUIPanels() {
             if (!gameStarted && !gameOver) {
-                ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
-                ctx.fillRect(40, 120, canvas.width - 80, 210);
-                ctx.strokeStyle = '#10b981';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(40, 120, canvas.width - 80, 210);
-
-                ctx.fillStyle = '#ffffff';
-                ctx.font = '900 20px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('ENTER THE ARENA', canvas.width / 2, 165);
-                
-                ctx.fillStyle = '#94a3b8';
-                ctx.font = '13px sans-serif';
-                ctx.fillText('Tap Center to Kick Up', canvas.width / 2, 195);
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.9)'; ctx.fillRect(40, 120, canvas.width - 80, 210);
+                ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2; ctx.strokeRect(40, 120, canvas.width - 80, 210);
+                ctx.fillStyle = '#ffffff'; ctx.font = '900 20px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('ENTER THE ARENA', canvas.width / 2, 165);
+                ctx.fillStyle = '#94a3b8'; ctx.font = '13px sans-serif'; ctx.fillText('Tap Center to Kick Up', canvas.width / 2, 195);
                 ctx.fillText('Tap Left/Right edges to DASH', canvas.width / 2, 220);
-
-                ctx.fillStyle = '#fbbf24';
-                ctx.font = 'bold 12px sans-serif';
-                ctx.fillText('🏆 Beat the bots to climb the leaderboard!', canvas.width / 2, 265);
-                ctx.fillStyle = '#06b6d4';
-                ctx.font = '11px sans-serif';
-                ctx.fillText('Your friends can lock their names here too!', canvas.width / 2, 290);
+                ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 12px sans-serif'; ctx.fillText('🏆 Beat the bots to climb the leaderboard!', canvas.width / 2, 265);
+                ctx.fillStyle = '#06b6d4'; ctx.font = '11px sans-serif'; ctx.fillText('Your friends can lock their names here too!', canvas.width / 2, 290);
             }
 
             if (gameOver) {
-                ctx.fillStyle = 'rgba(9, 13, 22, 0.92)';
-                ctx.fillRect(50, 140, canvas.width - 100, 160);
-                ctx.strokeStyle = '#ef4444';
-                ctx.strokeRect(50, 140, canvas.width - 100, 160);
-                
-                ctx.fillStyle = '#ef4444';
-                ctx.font = '900 24px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('SAVED! MATCH OVER', canvas.width / 2, 185);
-
-                ctx.font = 'bold 15px sans-serif';
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText(`Final Goals Scored: ${score}`, canvas.width / 2, 225);
-                ctx.fillStyle = '#fbbf24';
-                ctx.fillText('Tap Center to retry', canvas.width / 2, 265);
-                
-                // Fire off leaderboard score checker routine
+                ctx.fillStyle = 'rgba(9, 13, 22, 0.92)'; ctx.fillRect(50, 140, canvas.width - 100, 160);
+                ctx.strokeStyle = '#ef4444'; ctx.strokeRect(50, 140, canvas.width - 100, 160);
+                ctx.fillStyle = '#ef4444'; ctx.font = '900 24px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('SAVED! MATCH OVER', canvas.width / 2, 185);
+                ctx.font = 'bold 15px sans-serif'; ctx.fillStyle = '#ffffff'; ctx.fillText(`Final Goals Scored: ${score}`, canvas.width / 2, 225);
+                ctx.fillStyle = '#fbbf24'; ctx.fillText('Tap Center to retry', canvas.width / 2, 265);
                 checkLeaderboardEligibility();
             }
         }
 
         function executionLoop() {
-            ctx.fillStyle = '#1e3a8a';
-            ctx.fillRect(0,0, canvas.width, canvas.height);
+            ctx.fillStyle = '#1e3a8a'; ctx.fillRect(0,0, canvas.width, canvas.height);
 
             if (gameStarted && !gameOver) {
-                ball.velocity += ball.gravity;
-                ball.y += ball.velocity;
-                
-                ball.x += ball.xVelocity;
-                ball.rotation += 0.05 + (ball.xVelocity * 0.03);
+                ball.velocity += ball.gravity; ball.y += ball.velocity;
+                ball.x += ball.xVelocity; ball.rotation += 0.05 + (ball.xVelocity * 0.03);
 
-                if (keys.curveLeft) {
-                    ball.xVelocity = -2.2;
-                } else if (keys.curveRight) {
-                    ball.xVelocity = 2.2;
-                } else {
-                    ball.xVelocity *= 0.88;
-                    if (Math.abs(ball.xVelocity) < 0.1) ball.xVelocity = 0;
-                    
-                    if (ball.x > 100) ball.x -= 0.8;
-                    if (ball.x < 100) ball.x += 0.8;
+                if (keys.curveLeft) ball.xVelocity = -2.2;
+                else if (keys.curveRight) ball.xVelocity = 2.2;
+                else {
+                    ball.xVelocity *= 0.88; if (Math.abs(ball.xVelocity) < 0.1) ball.xVelocity = 0;
+                    if (ball.x > 100) ball.x -= 0.8; if (ball.x < 100) ball.x += 0.8;
                 }
 
                 ball.x = Math.max(40, Math.min(canvas.width - 120, ball.x));
 
                 spawnTimer++;
-                if (spawnTimer >= 105) {
-                    spawnCustomPost();
-                    spawnTimer = 0;
-                }
+                if (spawnTimer >= 105) { spawnCustomPost(); spawnTimer = 0; }
 
                 for (let i = obstacles.length - 1; i >= 0; i--) {
-                    let obs = obstacles[i];
-                    obs.x -= obstacleSpeed;
-
+                    let obs = obstacles[i]; obs.x -= obstacleSpeed;
                     obs.goalieY += obs.goalieSpeed * obs.goalieDir;
-                    if (obs.goalieY < obs.minY || obs.goalieY > obs.maxY) {
-                        obs.goalieDir *= -1;
-                    }
+                    if (obs.goalieY < obs.minY || obs.goalieY > obs.maxY) obs.goalieDir *= -1;
 
                     if (!obs.passed && obs.x + obstacleWidth < ball.x) {
-                        score += 1;
-                        document.getElementById('current-score').innerText = score;
-                        obs.passed = true;
-
-                        if(score % 3 === 0) obstacleSpeed += 0.2;
-
+                        score += 1; document.getElementById('current-score').innerText = score; obs.passed = true;
+                        
+                        // EASIER: Speed increments every 4 goals instead of 3, and goes up by less (0.15 instead of 0.2)
+                        if(score % 4 === 0) obstacleSpeed += 0.15;
+                        
                         if (score > highScore) {
-                            highScore = score;
-                            document.getElementById('high-score').innerText = highScore;
+                            highScore = score; document.getElementById('high-score').innerText = highScore;
                             try { localStorage.setItem('ftbHighScore', highScore); } catch(e){}
                         }
                     }
 
                     if (ball.x + ball.radius - 2 > obs.x && ball.x - ball.radius + 2 < obs.x + obstacleWidth) {
-                        if (ball.y - ball.radius + 2 < obs.top || ball.y + ball.radius - 2 > obs.top + obstacleGap) {
-                            gameOver = true;
-                        }
+                        if (ball.y - ball.radius + 2 < obs.top || ball.y + ball.radius - 2 > obs.top + obstacleGap) gameOver = true;
                     }
 
                     if (ball.x + ball.radius - 2 > obs.x + 6 && ball.x - ball.radius + 2 < obs.x + 12 + obs.goalieWidth) {
-                        if (ball.y + ball.radius - 2 > obs.goalieY && ball.y - ball.radius + 2 < obs.goalieY + obs.goalieHeight) {
-                            gameOver = true;
-                        }
+                        if (ball.y + ball.radius - 2 > obs.goalieY && ball.y - ball.radius + 2 < obs.goalieY + obs.goalieHeight) gameOver = true;
                     }
 
                     if (obs.x + obstacleWidth < 0) obstacles.splice(i, 1);
                 }
 
                 for (let i = targets.length - 1; i >= 0; i--) {
-                    let t = targets[i];
-                    t.x -= obstacleSpeed;
-
+                    let t = targets[i]; t.x -= obstacleSpeed;
                     let dist = Math.hypot(ball.x - t.x, ball.y - t.y);
                     if(!t.hit && dist < ball.radius + t.radius) {
-                        t.hit = true;
-                        totalCoins += 2;
-                        document.getElementById('coin-count').innerText = totalCoins;
+                        t.hit = true; totalCoins += 2; document.getElementById('coin-count').innerText = totalCoins;
                         try { localStorage.setItem('ftbTotalCoins', totalCoins); } catch(e){}
                     }
-
                     if(t.x + 30 < 0) targets.splice(i, 1);
                 }
 
                 for (let i = coins.length - 1; i >= 0; i--) {
-                    let c = coins[i];
-                    c.x -= obstacleSpeed;
-
+                    let c = coins[i]; c.x -= obstacleSpeed;
                     let dist = Math.hypot(ball.x - c.x, ball.y - c.y);
                     if (!c.collected && dist < ball.radius + c.radius) {
-                        c.collected = true;
-                        totalCoins += 1;
-                        document.getElementById('coin-count').innerText = totalCoins;
+                        c.collected = true; totalCoins += 1; document.getElementById('coin-count').innerText = totalCoins;
                         try { localStorage.setItem('ftbTotalCoins', totalCoins); } catch(e){}
                     }
-
                     if (c.x + 30 < 0) coins.splice(i, 1);
                 }
 
-                if (ball.y + ball.radius >= canvas.height - 40) {
-                    gameOver = true;
-                }
-                if (ball.y - ball.radius <= 0) {
-                    ball.y = ball.radius;
-                    ball.velocity = 1;
-                }
+                if (ball.y + ball.radius >= canvas.height - 40) gameOver = true;
+                if (ball.y - ball.radius <= 0) { ball.y = ball.radius; ball.velocity = 1; }
             }
 
-            drawStadiumObstacles();
-            drawPitchGrass();
-            drawFootball();
-            drawUIPanels();
-
+            drawStadiumObstacles(); drawPitchGrass(); drawFootball(); drawUIPanels();
             requestAnimationFrame(executionLoop);
         }
 
-        // Initialize setup on window load
-        updateShopUI();
-        updateLeaderboardUI();
-        executionLoop();
+        updateShopUI(); updateLeaderboardUI(); executionLoop();
     </script>
 </body>
 </html>
