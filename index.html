@@ -7,214 +7,203 @@
     <style>
         :root {
             --stadium-blue: #3b82f6;
-            --stadium-dark: #1e3a8a;
-            --grass-light: #15803d;
-            --grass-dark: #166534;
-            --gold: #fbbf24;
-            --panel-bg: rgba(15, 23, 42, 0.95);
-            --text-main: #f8fafc;
+            --grass-green: #22c55e;
+            --gold: #f59e0b;
+            --text-light: #ffffff;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             user-select: none;
             -webkit-user-select: none;
         }
 
         body {
-            background: radial-gradient(circle at center, #1e1b4b 0%, #090d16 100%);
-            color: var(--text-main);
+            background: #1e293b;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             overflow: hidden;
-            padding: 10px;
         }
 
-        #game-container {
+        #game-box {
             position: relative;
             width: 500px;
-            height: 520px;
-            background: #0f172a;
-            border: 4px solid #334155;
-            border-radius: 20px;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.7);
+            height: 530px;
+            border: 6px solid #475569;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             overflow: hidden;
+            background: #3b82f6;
         }
 
-        /* Menus and Screens Overlay */
-        .interface-screen {
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Frosted Glass UI Overlay - Allows the bright blue sky to show through perfectly */
+        .ui-layer {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: var(--panel-bg);
+            z-index: 10;
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 30px;
-            z-index: 10;
-            transition: all 0.25s ease;
+            transition: opacity 0.2s ease;
         }
 
         .hidden {
             opacity: 0;
             pointer-events: none;
-            transform: scale(0.98);
             z-index: 0;
         }
 
         h1 {
-            font-size: 2.2rem;
+            font-size: 2.4rem;
             font-weight: 900;
-            letter-spacing: 2px;
             text-transform: uppercase;
-            margin-bottom: 8px;
-            text-align: center;
             color: #ffffff;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-        h1 span { color: #4ade80; }
-
-        p.subtitle {
-            color: #94a3b8;
-            font-size: 0.95rem;
-            margin-bottom: 24px;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            margin-bottom: 5px;
             text-align: center;
         }
+        h1 span { color: #cfffa3; }
 
-        /* Buttons & Forms */
-        .btn {
-            background: linear-gradient(to bottom, #2563eb, #1d4ed8);
+        .tagline {
+            color: #e2e8f0;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            font-weight: 500;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Dashboard Menu Grid */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1.10fr 0.90fr;
+            gap: 15px;
+            width: 100%;
+            height: 60%;
+        }
+
+        .left-menu-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .option-card {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            border-radius: 12px;
+            padding: 14px;
             color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 1rem;
-            font-weight: bold;
-            border-radius: 8px;
             cursor: pointer;
-            text-transform: uppercase;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
             transition: all 0.15s ease;
         }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.5);
+        .option-card:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: #ffffff;
+            transform: scale(1.02);
         }
-        .btn-green {
-            background: linear-gradient(to bottom, #16a34a, #15803d);
-            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+        .option-card h3 { font-size: 1.1rem; margin-bottom: 2px; }
+        .option-card p { font-size: 0.8rem; color: #f1f5f9; }
+
+        /* Leaderboard Box */
+        .leaderboard-container {
+            background: rgba(15, 23, 42, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
         }
-        .btn-green:hover {
-            box-shadow: 0 6px 16px rgba(22, 163, 74, 0.5);
+        .leaderboard-header {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: #fcd34d;
+            text-transform: uppercase;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 5px;
+            margin-bottom: 8px;
+        }
+        .leaderboard-rows { display: flex; flex-direction: column; gap: 5px; }
+        .leaderboard-row {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+        }
+        .leaderboard-row.current-player {
+            border: 1px solid #ffffff;
+            background: rgba(59, 130, 246, 0.4);
         }
 
-        #username-input {
-            background: #0f172a;
-            border: 2px solid #475569;
+        /* Profile Selection Input */
+        #username-field {
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             color: white;
             padding: 12px;
             border-radius: 8px;
             font-size: 1.1rem;
             text-align: center;
-            margin-bottom: 16px;
-            width: 260px;
+            margin-bottom: 15px;
+            width: 250px;
             outline: none;
         }
-        #username-input:focus { border-color: #3b82f6; }
+        #username-field:focus { border-color: #ffffff; }
 
-        /* Dashboard Split Grid */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1.1fr 0.9fr;
-            gap: 20px;
-            width: 100%;
-            height: 65%;
-        }
-
-        .modes-column {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            justify-content: center;
-        }
-
-        .menu-card {
-            background: #1e293b;
-            border: 2px solid #334155;
-            border-radius: 10px;
-            padding: 14px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .menu-card:hover {
-            border-color: #3b82f6;
-            background: #24334d;
-            transform: translateX(4px);
-        }
-        .menu-card h3 { font-size: 1.15rem; margin-bottom: 4px; }
-        .menu-card p { font-size: 0.85rem; color: #94a3b8; }
-
-        /* Leaderboard Style */
-        .lb-box {
-            background: #0f172a;
-            border: 2px solid #334155;
-            border-radius: 10px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-        }
-        .lb-header {
-            font-size: 0.9rem;
-            font-weight: 800;
-            color: var(--gold);
-            text-transform: uppercase;
-            text-align: center;
-            border-bottom: 1px solid #334155;
-            padding-bottom: 6px;
-            margin-bottom: 8px;
-        }
-        .lb-list { display: flex; flex-direction: column; gap: 5px; }
-        .lb-entry {
-            display: flex;
-            justify-content: space-between;
-            background: #1e293b;
-            padding: 5px 8px;
-            border-radius: 4px;
-            font-size: 0.82rem;
-            font-weight: bold;
-        }
-        .lb-entry.user-highlight { border: 1px solid #3b82f6; background: rgba(59, 130, 246, 0.15); }
-
-        /* Level Mode Selection Map */
-        .level-row {
+        /* Stage Map View */
+        .stages-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            gap: 10px;
             width: 100%;
-            margin: 20px 0 30px;
+            margin: 20px 0;
         }
-        .level-node {
-            background: #1e293b;
-            border: 2px solid #334155;
-            border-radius: 10px;
-            padding: 20px 10px;
+        .stage-node {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            border-radius: 12px;
+            padding: 18px 5px;
             text-align: center;
+            color: white;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s ease;
         }
-        .level-node:hover:not(.locked) { border-color: #4ade80; transform: translateY(-3px); }
-        .level-node.locked { opacity: 0.35; cursor: not-allowed; border-style: dashed; }
-        .level-node h4 { font-size: 1.3rem; margin-bottom: 4px; }
-        .level-node span { font-size: 0.75rem; color: var(--gold); font-weight: bold; }
+        .stage-node:hover:not(.locked) {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: #ffffff;
+            transform: translateY(-2px);
+        }
+        .stage-node.locked { opacity: 0.3; cursor: not-allowed; border-style: dashed; }
+        .stage-node h4 { font-size: 1.2rem; }
+        .stage-node span { font-size: 0.75rem; color: #fcd34d; font-weight: bold; }
 
-        /* HUD Live Overlay */
+        /* Dynamic HUD Bar overlaying gameplay directly */
         #game-hud {
             position: absolute;
             top: 15px;
@@ -226,603 +215,630 @@
             z-index: 5;
         }
         .hud-pill {
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid #475569;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-weight: 800;
-            font-size: 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.95rem;
         }
-        #hud-score { color: #4ade80; }
-        #hud-stage { font-size: 0.8rem; text-transform: uppercase; display: flex; align-items: center; color: #67e8f9;}
 
-        canvas { display: block; background: linear-gradient(to bottom, #3b82f6, #60a5fa); }
+        .btn {
+            background: #22c55e;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: all 0.15s ease;
+        }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
 
-<div id="game-container">
+<div id="game-box">
 
-    <!-- Active Gameplay HUD Display -->
     <div id="game-hud" class="hidden">
         <div id="hud-score" class="hud-pill">Goals: 0</div>
-        <div id="hud-stage" class="hud-pill">Warm-Up</div>
+        <div id="hud-phase" class="hud-pill">Phase 1</div>
     </div>
 
-    <!-- Screen 1: One-Time Username Lock -->
-    <div id="scr-username" class="interface-screen">
-        <h1>STRIKER: <span>TOP BINS</span></h1>
-        <p class="subtitle">Set your identity to unlock automatic leaderboard tracking.</p>
-        <input type="text" id="username-input" placeholder="KICKER INITIALS" maxlength="12">
-        <button id="btn-lock-profile" class="btn">Enter Stadium</button>
+    <div id="layer-username" class="ui-layer">
+        <h1>STRIKER PROFILE</h1>
+        <p class="tagline">Setup your kit to synchronize match scoring boards</p>
+        <input type="text" id="username-field" placeholder="INITIALS / NAME" maxlength="12">
+        <button id="btn-save-profile" class="btn">Enter Arena</button>
     </div>
 
-    <!-- Screen 2: Central Hub Menu -->
-    <div id="scr-menu" class="interface-screen hidden">
-        <h1 style="font-size: 1.8rem; margin-bottom: 2px;">STADIUM DASHBOARD</h1>
-        <div id="profile-tag" style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 15px;">Welcome</div>
+    <div id="layer-dashboard" class="ui-layer hidden">
+        <h1>TOP BINS <span>ARENA</span></h1>
+        <p id="player-welcome-tag" class="tagline">Welcome Pro Striker</p>
 
-        <div class="dashboard-grid">
-            <div class="modes-column">
-                <div class="menu-card" id="card-endless">
+        <div class="menu-grid">
+            <div class="left-menu-column">
+                <div class="option-card" id="opt-endless">
                     <h3>🏆 Endless Run</h3>
-                    <p>Survive evolving defense tiers. Overtake pre-set bot records cleanly.</p>
+                    <p>Survive progressive defense phases. Top the leaderboards.</p>
                 </div>
-                <div class="menu-card" id="card-campaign">
-                    <h3>🕹️ Stage Challenge</h3>
-                    <p>Clear direct target goals across 3 tuned milestone levels.</p>
+                <div class="option-card" id="opt-stages">
+                    <h3>🕹️ Stage Mode</h3>
+                    <p>Clear tactical milestone scenario goals across 3 levels.</p>
                 </div>
             </div>
-            <div class="lb-box">
-                <div class="lb-header">Leaderboard Standings</div>
-                <div class="lb-list" id="menu-lb-list"></div>
+            <div class="leaderboard-container">
+                <div class="leaderboard-header">Top Field Records</div>
+                <div class="leaderboard-rows" id="dashboard-lb-rows"></div>
             </div>
         </div>
     </div>
 
-    <!-- Screen 3: Campaign Stage Roadmap -->
-    <div id="scr-campaign" class="interface-screen hidden">
-        <h1 style="font-size: 1.6rem;">Select Your Stage</h1>
-        <p class="subtitle">Complete scenarios to open upcoming tiers.</p>
+    <div id="layer-stages" class="ui-layer hidden">
+        <h1>SELECT STAGE</h1>
+        <p class="tagline">Hit the target milestones to clear your sheet</p>
 
-        <div class="level-row">
-            <div class="level-node" data-lvl="1">
-                <h4>Lvl 1</h4>
+        <div class="stages-row">
+            <div class="stage-node" data-stg="1">
+                <h4>Stage 1</h4>
                 <span>Target: 10</span>
             </div>
-            <div class="level-node" data-lvl="2" id="node-l2">
-                <h4>Lvl 2</h4>
+            <div class="stage-node" data-stg="2" id="stg-node-2">
+                <h4>Stage 2</h4>
                 <span>Target: 15</span>
             </div>
-            <div class="level-node" data-lvl="3" id="node-l3">
-                <h4>Lvl 3</h4>
+            <div class="stage-node" data-stg="3" id="stg-node-3">
+                <h4>Stage 3</h4>
                 <span>Target: 20</span>
             </div>
         </div>
 
-        <button class="btn btn-menu-return" style="background: #475569; font-size: 0.85rem; padding: 8px 16px;">Back to Hub</button>
+        <button class="btn btn-to-hub" style="background: #64748b; padding: 8px 16px; font-size: 0.85rem;">Dashboard Hub</button>
     </div>
 
-    <!-- Screen 4: Match Summary -->
-    <div id="scr-gameover" class="interface-screen hidden">
-        <h1 id="go-title">Full Time</h1>
-        <p id="go-score" style="font-size: 1.1rem; margin-bottom: 8px;">Goals Scored: 0</p>
-        <p id="go-status" style="color: var(--gold); font-weight: bold; font-size: 0.85rem; margin-bottom: 20px; min-height: 18px;"></p>
+    <div id="layer-matchover" class="ui-layer hidden">
+        <h1 id="mo-title">FULL TIME</h1>
+        <p id="mo-stats" style="font-size: 1.15rem; color: white; margin-bottom: 5px; font-weight: bold;">Goals: 0</p>
+        <p id="mo-alert" style="color: #fcd34d; font-size: 0.85rem; font-weight: 800; margin-bottom: 25px; min-height: 18px; text-align: center;"></p>
 
         <div style="display: flex; gap: 12px;">
-            <button id="btn-replay" class="btn btn-green">Play Again</button>
-            <button class="btn btn-menu-return" style="background: #475569;">Main Menu</button>
+            <button id="btn-rematch" class="btn">Rematch</button>
+            <button class="btn btn-to-hub" style="background: #64748b;">Main Menu</button>
         </div>
     </div>
 
-    <!-- Game Engine Canvas Interface -->
-    <canvas id="stageCanvas" width="500" height="520"></canvas>
+    <canvas id="arenaCanvas" width="500" height="530"></canvas>
 
 </div>
 
 <script>
-    // --- DATA & HARDWARE SYSTEM CONFIGURATION ---
-    const SEED_RECORDS = [
-        { name: "🐐 Messi Bot", score: 15, bot: true },
-        { name: "🤖 Ronaldo Bot", score: 12, bot: true },
-        { name: "🇧🇷 Neymar Bot", score: 9, bot: true },
-        { name: "💎 Yamal Bot", score: 7, bot: true },
-        { name: "⚡ Mbappe Bot", score: 5, bot: true },
-        { name: "🦁 Zlatan Bot", score: 3, bot: true }
+    // --- PERSISTENCE AND SEED MOCK REGISTRY ---
+    const MOCK_BOARD = [
+        { name: "🐐 MESSI BOT", score: 15, system: true },
+        { name: "🤖 RONALDO BOT", score: 12, system: true },
+        { name: "🇧🇷 NEYMAR BOT", score: 9, system: true },
+        { name: "💎 YAMAL BOT", score: 7, system: true },
+        { name: "⚡ MBAPPE BOT", score: 5, system: true },
+        { name: "🦁 ZLATAN BOT", score: 3, system: true }
     ];
 
-    let userProfile = {
-        name: localStorage.getItem('ftb_name') || '',
-        highestLevel: parseInt(localStorage.getItem('ftb_highLvl')) || 1,
-        scores: JSON.parse(localStorage.getItem('ftb_board')) || SEED_RECORDS
+    let session = {
+        player: localStorage.getItem('ft_user') || '',
+        highestUnlocked: parseInt(localStorage.getItem('ft_highstg')) || 1,
+        board: JSON.parse(localStorage.getItem('ft_scores')) || MOCK_BOARD
     };
 
-    const canvas = document.getElementById('stageCanvas');
+    const canvas = document.getElementById('arenaCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Engine Balancers
+    // Solid Non-Glitching Balancing Constants
     const BALANCER = {
-        gravity: 0.23,
-        kickUp: -5.8,
-        scrollSpeed: 2.5,
-        tunnelInterval: 220,
-        tunnelGap: 165,
-        ballRadius: 13,
-        hitboxCushion: 3.5 // Visual buffer forgiveness to reduce frustration
+        gravity: 0.22,
+        jumpForce: -5.5,
+        forwardSpeed: 2.4,
+        spacing: 220,
+        gapSize: 165,
+        ballSize: 13,
+        cushion: 3.5 // Smooth hitbox visual tolerance buffer
     };
 
-    let animationId = null;
-    let running = false;
-    let selectedMode = 'endless'; // 'endless' or 'campaign'
-    let levelSelected = 1;
+    let animationFrameId = null;
+    let isRunning = false;
+    let currentMode = 'endless'; // 'endless' or 'stages'
+    let currentStage = 1;
 
-    // Entities State Machine
-    let football = {};
-    let tunnels = [];
+    // Entity State Elements
+    let ball = {};
+    let posts = [];
     let keeper = {};
     let score = 0;
     let particles = [];
 
-    // --- APPLICATION START AND ROUTING ENGINE ---
-    function bootEngine() {
-        if (!userProfile.name) {
-            switchUI('scr-username');
+    // --- APPLICATION START AND ROUTING HANDLERS ---
+    function initStadiumApp() {
+        // Draw background scenery immediately once so the sky is fully visible from boot up
+        renderStaticBackgroundScenery();
+        
+        if (!session.player) {
+            popUI('layer-username');
         } else {
-            showDashboardMenu();
+            loadDashboardHub();
         }
     }
 
-    document.getElementById('btn-lock-profile').addEventListener('click', () => {
-        let val = document.getElementById('username-input').value.trim();
-        if (val.length >= 2) {
-            userProfile.name = val.toUpperCase();
-            localStorage.setItem('ftb_name', userProfile.name);
-            showDashboardMenu();
+    document.getElementById('btn-save-profile').addEventListener('click', (e) => {
+        e.stopPropagation();
+        let input = document.getElementById('username-field').value.trim();
+        if (input.length >= 2) {
+            session.player = input.toUpperCase();
+            localStorage.setItem('ft_user', session.player);
+            loadDashboardHub();
         } else {
-            alert('Please enter at least 2 characters for your profile name.');
+            alert('Enter a valid striker profile name (min 2 characters).');
         }
     });
 
-    function switchUI(screenId) {
-        document.querySelectorAll('.interface-screen').forEach(s => s.classList.add('hidden'));
+    function popUI(uiId) {
+        document.querySelectorAll('.ui-layer').forEach(layer => layer.classList.add('hidden'));
         document.getElementById('game-hud').classList.add('hidden');
-        if (screenId) document.getElementById(screenId).classList.remove('hidden');
+        if (uiId) document.getElementById(uiId).classList.remove('hidden');
     }
 
-    function showDashboardMenu() {
-        document.getElementById('profile-tag').innerText = `ACTIVE PRO STRIKER: ${userProfile.name}`;
-        buildLeaderboardDOM();
-        switchUI('scr-menu');
+    function loadDashboardHub() {
+        document.getElementById('player-welcome-tag').innerText = `ACTIVE PRO STRIKER: ${session.player} ⚽`;
+        renderLeaderboardDOM();
+        popUI('layer-dashboard');
     }
 
-    function buildLeaderboardDOM() {
-        const list = document.getElementById('menu-lb-list');
-        list.innerHTML = '';
+    function renderLeaderboardDOM() {
+        const parent = document.getElementById('dashboard-lb-rows');
+        parent.innerHTML = '';
         
-        userProfile.scores.sort((a, b) => b.score - a.score);
-        userProfile.scores = userProfile.scores.slice(0, 6);
-        localStorage.setItem('ftb_board', JSON.stringify(userProfile.scores));
+        session.board.sort((a, b) => b.score - a.score);
+        session.board = session.board.slice(0, 6);
+        localStorage.setItem('ft_scores', JSON.stringify(session.board));
 
-        userProfile.scores.forEach((entry, idx) => {
-            let row = document.createElement('div');
-            let isCurrentPlayer = (entry.name === userProfile.name && !entry.bot);
-            row.className = `lb-entry ${isCurrentPlayer ? 'user-highlight' : ''}`;
-            row.innerHTML = `<span>#${idx+1} ${entry.name}</span><span>${entry.score} G</span>`;
-            list.appendChild(row);
+        session.board.forEach((record, index) => {
+            let item = document.createElement('div');
+            let matched = (record.name === session.player && !record.system);
+            item.className = `leaderboard-row ${matched ? 'current-player' : ''}`;
+            item.innerHTML = `<span>#${index + 1} ${record.name}</span><span>${record.score} G</span>`;
+            parent.appendChild(item);
         });
     }
 
-    // --- VIEW TRAVERSAL ACTIONS ---
-    document.getElementById('card-endless').addEventListener('click', () => {
-        selectedMode = 'endless';
-        triggerMatchSetup();
+    // --- NAVIGATION TRAVERSALS ---
+    document.getElementById('opt-endless').addEventListener('click', (e) => {
+        e.stopPropagation();
+        currentMode = 'endless';
+        setupMatchSession();
     });
 
-    document.getElementById('card-campaign').addEventListener('click', () => {
-        document.getElementById('node-l2').className = `level-node ${userProfile.highestLevel < 2 ? 'locked' : ''}`;
-        document.getElementById('node-l3').className = `level-node ${userProfile.highestLevel < 3 ? 'locked' : ''}`;
-        switchUI('scr-campaign');
+    document.getElementById('opt-stages').addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.getElementById('stg-node-2').className = `stage-node ${session.highestUnlocked < 2 ? 'locked' : ''}`;
+        document.getElementById('stg-node-3').className = `stage-node ${session.highestUnlocked < 3 ? 'locked' : ''}`;
+        popUI('layer-stages');
     });
 
-    document.querySelectorAll('.level-node').forEach(node => {
-        node.addEventListener('click', function() {
-            let selected = parseInt(this.getAttribute('data-lvl'));
-            if (selected <= userProfile.highestLevel) {
-                selectedMode = 'campaign';
-                levelSelected = selected;
-                triggerMatchSetup();
+    document.querySelectorAll('.stage-node').forEach(node => {
+        node.addEventListener('click', function(e) {
+            e.stopPropagation();
+            let stg = parseInt(this.getAttribute('data-stg'));
+            if (stg <= session.highestUnlocked) {
+                currentMode = 'stages';
+                currentStage = stg;
+                setupMatchSession();
             }
         });
     });
 
-    document.querySelectorAll('.btn-menu-return').forEach(btn => {
-        btn.addEventListener('click', showDashboardMenu);
+    document.querySelectorAll('.btn-to-hub').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            loadDashboardHub();
+        });
     });
 
-    document.getElementById('btn-replay').addEventListener('click', triggerMatchSetup);
+    document.getElementById('btn-rematch').addEventListener('click', (e) => {
+        e.stopPropagation();
+        setupMatchSession();
+    });
 
-    // --- GAME ENGINE CYCLE MANAGEMENT ---
-    function triggerMatchSetup() {
-        switchUI(null);
+    // --- CORE GAME ENGINE AND LIFECYCLE ---
+    function setupMatchSession() {
+        popUI(null); // Hide all menus, show naked canvas loop
         document.getElementById('game-hud').classList.remove('hidden');
 
         score = 0;
-        tunnels = [];
+        posts = [];
         particles = [];
-        running = true;
+        isRunning = true;
 
-        football = {
-            x: 120, y: 200,
-            radius: BALANCER.ballRadius,
-            vY: 0, radAngle: 0
+        ball = {
+            x: 130,
+            y: 180,
+            radius: BALANCER.ballSize,
+            velocity: 0,
+            angle: 0
         };
 
         keeper = {
-            x: 0, y: 180,
+            x: 0, y: 150,
             width: 32, height: 50,
-            speed: 2.0, heading: 1,
-            enabled: false, pattern: 'none'
+            speed: 1.8, direction: 1,
+            active: false, mode: 'none'
         };
 
-        refreshHUD();
+        refreshHUDDisplay();
 
-        // Standardize dynamic generation spacing patterns
-        generateTunnelObstacle(450);
-        generateTunnelObstacle(450 + BALANCER.tunnelInterval);
+        // Spawn layout anchors forward smoothly
+        spawnGoalpostUnit(460);
+        spawnGoalpostUnit(460 + BALANCER.spacing);
 
-        if (animationId) cancelAnimationFrame(animationId);
-        animationId = requestAnimationFrame(frameProcessLoop);
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        animationFrameId = requestAnimationFrame(engineProcessingCore);
     }
 
-    // Initialize Input Handlers Globally Once
-    window.addEventListener('keydown', (e) => {
-        if ((e.code === 'Space' || e.code === 'ArrowUp') && running) {
-            e.preventDefault();
-            football.vY = BALANCER.kickUp;
-        }
-    });
-    canvas.addEventListener('mousedown', () => {
-        if (running) football.vY = BALANCER.kickUp;
-    });
+    // ONE SINGLE GLOBAL CONTROLLER EVENT TO PREVENT LOCKING UP OR MULTIPLE ATTACHMENTS
+    window.removeEventListener('keydown', processJumpAction);
+    window.addEventListener('keydown', processJumpAction);
+    canvas.removeEventListener('mousedown', processCanvasClickAction);
+    canvas.addEventListener('mousedown', processCanvasClickAction);
 
-    function generateTunnelObstacle(xPos) {
-        let padding = 50;
-        let limit = canvas.height - BALANCER.tunnelGap - padding - 40;
-        let topH = Math.floor(Math.random() * (limit - padding + 1)) + padding;
-        
-        tunnels.push({
-            x: xPos,
-            topHeight: topH,
-            bottomY: topH + BALANCER.tunnelGap,
+    function processJumpAction(e) {
+        if ((e.code === 'Space' || e.code === 'ArrowUp') && isRunning) {
+            e.preventDefault();
+            ball.velocity = BALANCER.jumpForce;
+        }
+    }
+    function processCanvasClickAction() {
+        if (isRunning) ball.velocity = BALANCER.jumpForce;
+    }
+
+    function spawnGoalpostUnit(targetX) {
+        let pad = 60;
+        let groundCut = canvas.height - 40 - BALANCER.gapSize - pad;
+        let finalTopH = Math.floor(Math.random() * (groundCut - pad + 1)) + pad;
+
+        posts.push({
+            x: targetX,
+            topHeight: finalTopH,
+            bottomY: finalTopH + BALANCER.gapSize,
             scored: false
         });
     }
 
-    function refreshHUD() {
+    function refreshHUDDisplay() {
         document.getElementById('hud-score').innerText = `Goals: ${score}`;
-        let stageText = document.getElementById('hud-stage');
+        let label = document.getElementById('hud-phase');
 
-        if (selectedMode === 'endless') {
-            if (score <= 10) stageText.innerHTML = `<span style="color:#4ade80">Phase 1: Warm-Up</span>`;
-            else if (score <= 20) stageText.innerHTML = `<span style="color:#22d3ee">Phase 2: Patrol</span>`;
-            else stageText.innerHTML = `<span style="color:#f87171">Phase 3: Deep Box</span>`;
+        if (currentMode === 'endless') {
+            if (score <= 10) label.innerHTML = `<span style="color:#22c55e">Phase 1: Warm-Up</span>`;
+            else if (score <= 20) label.innerHTML = `<span style="color:#3b82f6">Phase 2: Patrol</span>`;
+            else label.innerHTML = `<span style="color:#ef4444">Phase 3: Deep Box</span>`;
         } else {
-            let targetGoal = levelSelected === 1 ? 10 : levelSelected === 2 ? 15 : 20;
-            stageText.innerHTML = `<span style="color:var(--gold)">Stage ${levelSelected} (Target: ${targetGoal})</span>`;
+            let target = currentStage === 1 ? 10 : currentStage === 2 ? 15 : 20;
+            label.innerHTML = `<span style="color:#fcd34d">Stage ${currentStage} (Target: ${target})</span>`;
         }
     }
 
-    function frameProcessLoop() {
-        if (!running) return;
+    function engineProcessingCore() {
+        if (!isRunning) return;
 
-        updateFrameState();
-        renderFrameGraphics();
+        updateEntitiesLogic();
+        renderActiveGraphicsLayers();
 
-        animationId = requestAnimationFrame(frameProcessLoop);
+        animationFrameId = requestAnimationFrame(engineProcessingCore);
     }
 
-    // --- GAMEPLAY CORE LOGIC ---
-    function updateFrameState() {
-        // 1. Gravity Environment Physics
-        football.vY += BALANCER.gravity;
-        football.y += football.vY;
-        football.radAngle += 0.06;
+    // --- GAMEPLAY SYSTEM LAWS & PHYSICS ---
+    function updateEntitiesLogic() {
+        // 1. Structural Environment Gravity Applied
+        ball.velocity += BALANCER.gravity;
+        ball.y += ball.velocity;
+        ball.angle += 0.06;
 
-        // Boundaries Out of Bounds check
-        if (football.y + football.radius > canvas.height - 40 || football.y - football.radius < 0) {
-            endMatchCycle(false);
+        // Boundaries Crash Validation Check
+        if (ball.y + ball.radius > canvas.height - 40 || ball.y - ball.radius < 0) {
+            terminateMatchSession(false);
             return;
         }
 
-        // Identify active upcoming tunnel set
-        let targetTunnel = tunnels.find(t => t.x + 55 > football.x - football.radius);
-        
-        // 2. Intelligent Goalkeeper Adaptive Routing
-        evaluateGoalkeeperAI(targetTunnel);
+        // Identify the localized nearest upcoming post
+        let nearestPost = posts.find(p => p.x + 55 > ball.x - ball.radius);
 
-        if (keeper.enabled) {
-            if (keeper.pattern === 'tracking') {
-                let trackGap = football.y - keeper.y - (keeper.height / 2);
-                keeper.y += Math.sign(trackGap) * Math.min(Math.abs(trackGap), 1.65); // Eased tracking lag
+        // 2. Intelligent Goalkeeper Adaptive Phase Routing Setup
+        evaluateGoalkeeperAIBehavior(nearestPost);
+
+        if (keeper.active) {
+            if (keeper.mode === 'tracking') {
+                let deltaY = ball.y - keeper.y - (keeper.height / 2);
+                keeper.y += Math.sign(deltaY) * Math.min(Math.abs(deltaY), 1.6); // Eased vertical follow tracking speed
                 
-                // Keep layout bounded within stadium sky
                 if (keeper.y < 10) keeper.y = 10;
-                if (keeper.y + keeper.height > canvas.height - 50) keeper.y = canvas.height - 50 - keeper.height;
-            } else if (keeper.pattern === 'vertical') {
-                keeper.y += keeper.speed * keeper.heading;
-                if (targetTunnel) {
-                    if (keeper.y < targetTunnel.topHeight + 2 || keeper.y + keeper.height > targetTunnel.bottomY - 2) {
-                        keeper.heading *= -1; // Bounce inside mouth
+                if (keeper.y + keeper.height > canvas.height - 48) keeper.y = canvas.height - 48 - keeper.height;
+            } else if (keeper.mode === 'vertical') {
+                keeper.y += keeper.speed * keeper.direction;
+                if (nearestPost) {
+                    if (keeper.y < nearestPost.topHeight + 3 || keeper.y + keeper.height > nearestPost.bottomY - 3) {
+                        keeper.direction *= -1; // Bounce back inside empty passage tunnel gap
                     }
                 }
             }
         }
 
-        // 3. Move Obstacles & Calculate Precise Hitbox Collisions
-        for (let i = tunnels.length - 1; i >= 0; i--) {
-            let tun = tunnels[i];
-            tun.x -= BALANCER.scrollSpeed;
+        // 3. Goalposts Forward Progression & Precision Hitbox Calculations
+        for (let i = posts.length - 1; i >= 0; i--) {
+            let targetP = posts[i];
+            targetP.x -= BALANCER.forwardSpeed;
 
-            // Box Clipping Metrics with Buffer cushion protection
-            let bL = football.x - football.radius + BALANCER.hitboxCushion;
-            let bR = football.x + football.radius - BALANCER.hitboxCushion;
-            let bT = football.y - football.radius + BALANCER.hitboxCushion;
-            let bB = football.y + football.radius - BALANCER.hitboxCushion;
+            // Box Clipping Metrics using Cushion Tolerance to bypass frame-skipping glitches
+            let bL = ball.x - ball.radius + BALANCER.cushion;
+            let bR = ball.x + ball.radius - BALANCER.cushion;
+            let bT = ball.y - ball.radius + BALANCER.cushion;
+            let bB = ball.y + ball.radius - BALANCER.cushion;
 
-            if (bR > tun.x && bL < tun.x + 55) {
-                if (bT < tun.topHeight || bB > tun.bottomY) {
-                    endMatchCycle(false);
+            if (bR > targetP.x && bL < targetP.x + 55) {
+                if (bT < targetP.topHeight || bB > targetP.bottomY) {
+                    terminateMatchSession(false);
                     return;
                 }
             }
 
-            // Clean Scoring Check
-            if (!tun.scored && tun.x + 25 < football.x) {
-                tun.scored = true;
+            // Accurate Point Passage Allocation
+            if (!targetP.scored && targetP.x + 25 < ball.x) {
+                targetP.scored = true;
                 score++;
-                refreshHUD();
-                emitGoalParticles();
-                evaluateCampaignMilestone();
+                refreshHUDDisplay();
+                igniteGoalExplosionFX();
+                evaluateStageVictoryParameters();
             }
 
-            // Slice out old pipes cleanly going backwards
-            if (tun.x < -80) tunnels.splice(i, 1);
+            // Splice out old pipes cleanly going backwards inside safety cycle index
+            if (targetP.x < -70) posts.splice(i, 1);
         }
 
-        // 4. Live Goalkeeper Active Hitbox Clipping
-        if (keeper.enabled) {
-            let bL = football.x - football.radius + BALANCER.hitboxCushion;
-            let bR = football.x + football.radius - BALANCER.hitboxCushion;
-            let bT = football.y - football.radius + BALANCER.hitboxCushion;
-            let bB = football.y + football.radius - BALANCER.hitboxCushion;
+        // 4. Live Keeper Collision Clipping Check
+        if (keeper.active) {
+            let bL = ball.x - ball.radius + BALANCER.cushion;
+            let bR = ball.x + ball.radius - BALANCER.cushion;
+            let bT = ball.y - ball.radius + BALANCER.cushion;
+            let bB = ball.y + ball.radius - BALANCER.cushion;
 
             if (bR > keeper.x && bL < keeper.x + keeper.width) {
                 if (bB > keeper.y && bT < keeper.y + keeper.height) {
-                    endMatchCycle(false);
+                    terminateMatchSession(false);
                     return;
                 }
             }
         }
 
-        // Procedural Generation Anchor
-        if (tunnels[tunnels.length - 1].x < canvas.width - BALANCER.tunnelInterval) {
-            generateTunnelObstacle(canvas.width);
+        // Seamless Procedural Generation Buffer
+        if (posts[posts.length - 1].x < canvas.width - BALANCER.spacing) {
+            spawnGoalpostUnit(canvas.width);
         }
 
-        // 5. Update Explosion Particles safely backwards
+        // 5. Update Explosion Particles backwards safely to prevent skipping indices
         for (let i = particles.length - 1; i >= 0; i--) {
-            let p = particles[i];
-            p.x += p.vX; p.y += p.vY; p.alpha -= p.fade;
-            if (p.alpha <= 0) particles.splice(i, 1);
+            let pt = particles[i];
+            pt.x += pt.vX; pt.y += pt.vY; pt.alpha -= pt.decay;
+            if (pt.alpha <= 0) particles.splice(i, 1);
         }
     }
 
-    function evaluateGoalkeeperAI(targetTunnel) {
-        if (!targetTunnel) return;
+    function evaluateGoalkeeperAIBehavior(nearestPost) {
+        if (!nearestPost) return;
 
-        if (selectedMode === 'endless') {
+        if (currentMode === 'endless') {
             if (score <= 10) {
-                keeper.enabled = false;
+                keeper.active = false;
             } else if (score <= 20) {
-                // Phase 2: Position keeper directly in empty air gap tracking ball height
-                keeper.enabled = true;
-                keeper.pattern = 'tracking';
-                keeper.x = targetTunnel.x - 90;
+                // Phase 2: Open midfield patrol tracking ball height outside goal line bounds
+                keeper.active = true;
+                keeper.mode = 'tracking';
+                keeper.x = nearestPost.x - 90;
             } else {
-                // Phase 3: Position right inside the tunnel moving up and down pacing
-                keeper.enabled = true;
-                if (keeper.pattern !== 'vertical') {
-                    keeper.pattern = 'vertical';
-                    keeper.y = targetTunnel.topHeight + 5;
-                    keeper.speed = 2.8;
+                // Phase 3: Vertical pacing moving box wall right inside the mouth
+                keeper.active = true;
+                if (keeper.mode !== 'vertical') {
+                    keeper.mode = 'vertical';
+                    keeper.y = nearestPost.topHeight + 5;
+                    keeper.speed = 2.6;
                 }
-                keeper.x = targetTunnel.x + 12;
+                keeper.x = nearestPost.x + 12;
             }
         } else {
-            // Campaign Discrete Assignment Configurations
-            if (levelSelected === 1) {
-                keeper.enabled = false;
-            } else if (levelSelected === 2) {
-                keeper.enabled = true;
-                keeper.pattern = 'tracking';
-                keeper.x = targetTunnel.x - 90;
+            // Campaign Fixed Direct Stage Assignments
+            if (currentStage === 1) {
+                keeper.active = false;
+            } else if (currentStage === 2) {
+                keeper.active = true;
+                keeper.mode = 'tracking';
+                keeper.x = nearestPost.x - 90;
             } else {
-                keeper.enabled = true;
-                if (keeper.pattern !== 'vertical') {
-                    keeper.pattern = 'vertical';
-                    keeper.y = targetTunnel.topHeight + 5;
-                    keeper.speed = 3.0;
+                keeper.active = true;
+                if (keeper.mode !== 'vertical') {
+                    keeper.mode = 'vertical';
+                    keeper.y = nearestPost.topHeight + 5;
+                    keeper.speed = 2.8;
                 }
-                keeper.x = targetTunnel.x + 12;
+                keeper.x = nearestPost.x + 12;
             }
         }
     }
 
-    function emitGoalParticles() {
-        for(let i=0; i<12; i++) {
+    function igniteGoalExplosionFX() {
+        for (let i = 0; i < 12; i++) {
             particles.push({
-                x: football.x + 15, y: football.y,
+                x: ball.x + 15, y: ball.y,
                 vX: Math.random() * 3 + 2, vY: (Math.random() - 0.5) * 5,
-                radius: Math.random() * 3 + 2,
-                color: i % 2 === 0 ? '#4ade80' : '#fbbf24',
-                alpha: 1, fade: 0.04
+                radius: Math.random() * 3 + 1.5,
+                color: i % 2 === 0 ? '#cfffa3' : '#ffffff',
+                alpha: 1, decay: 0.04
             });
         }
     }
 
-    function evaluateCampaignMilestone() {
-        if (selectedMode !== 'campaign') return;
-        let targetGoal = levelSelected === 1 ? 10 : levelSelected === 2 ? 15 : 20;
-        
-        if (score >= targetGoal) {
-            if (levelSelected === userProfile.highestLevel && userProfile.highestLevel < 3) {
-                userProfile.highestLevel++;
-                localStorage.setItem('ftb_highLvl', userProfile.highestLevel);
+    function evaluateStageVictoryParameters() {
+        if (currentMode !== 'stages') return;
+        let targetVal = currentStage === 1 ? 10 : currentStage === 2 ? 15 : 20;
+
+        if (score >= targetVal) {
+            if (currentStage === session.highestUnlocked && session.highestUnlocked < 3) {
+                session.highestUnlocked++;
+                localStorage.setItem('ft_highstg', session.highestUnlocked);
             }
-            endMatchCycle(true);
+            terminateMatchSession(true);
         }
     }
 
-    function endMatchCycle(isCampaignWin) {
-        running = false;
-        cancelAnimationFrame(animationId);
+    function terminateMatchSession(isWinnerOutcome) {
+        isRunning = false;
+        cancelAnimationFrame(animationFrameId);
 
-        let title = document.getElementById('go-title');
-        let txtScore = document.getElementById('go-score');
-        let txtStatus = document.getElementById('go-status');
+        let head = document.getElementById('mo-title');
+        let stats = document.getElementById('mo-stats');
+        let alertBar = document.getElementById('mo-alert');
 
-        txtStatus.innerText = "";
+        alertBar.innerText = "";
 
-        if (isCampaignWin) {
-            title.innerHTML = "🏆 STAGE CLEARED";
-            txtScore.innerHTML = `Completed Stage ${levelSelected} at ${score} Goals!`;
-            txtStatus.innerText = levelSelected === 3 ? "👑 CAMPAIGN COMPLETE - YOU ARE THE GOAT!" : "Next challenge tier unlocked on dashboard.";
+        if (isWinnerOutcome) {
+            head.innerHTML = "🏆 STAGE CLEARED";
+            stats.innerHTML = `Completed Stage ${currentStage} at ${score} Goals!`;
+            alertBar.innerText = currentStage === 3 ? "👑 CHUB CHALLENGE COMPLETE - YOU ARE THE GOAT!" : "Next tactical stage tier unlocked successfully.";
         } else {
-            title.innerHTML = "MATCH ENDED";
-            txtScore.innerText = `Final Net Score: ${score} Goals`;
-            
-            if (selectedMode === 'endless') {
-                // Silently trace high score ranks behind scenes instantly
-                let syncLog = executeAutomaticLeaderboardSync(score);
-                if (syncLog.qualified) {
-                    txtStatus.innerText = `🔥 Automatic Live Board Sync: Slot Placement #${syncLog.rank}!`;
+            head.innerHTML = "FULL TIME";
+            stats.innerText = `Final Score: ${score} Goals`;
+
+            if (currentMode === 'endless') {
+                let checkRegistry = syncLiveLeaderboardRecords(score);
+                if (checkRegistry.qualified) {
+                    alertBar.innerText = `🔥 Automatic Sync: Highscore Slot Verified #${checkRegistry.rank}!`;
                 }
             }
         }
-        switchUI('scr-gameover');
+        popUI('layer-matchover');
     }
 
-    function executeAutomaticLeaderboardSync(finalScore) {
-        userProfile.scores.sort((a, b) => b.score - a.score);
-        let check = { qualified: false, rank: -1 };
+    function syncLiveLeaderboardRecords(finalScore) {
+        session.board.sort((a, b) => b.score - a.score);
+        let tracking = { qualified: false, rank: -1 };
 
-        if (userProfile.scores.length < 6 || finalScore > userProfile.scores[userProfile.scores.length - 1].score) {
-            check.qualified = true;
-            userProfile.scores.push({ name: userProfile.name, score: finalScore, bot: false });
+        if (session.board.length < 6 || finalScore > session.board[session.board.length - 1].score) {
+            tracking.qualified = true;
+            session.board.push({ name: session.player, score: finalScore, system: false });
             
-            userProfile.scores.sort((a, b) => b.score - a.score);
-            userProfile.scores = userProfile.scores.slice(0, 6);
-            localStorage.setItem('ftb_board', JSON.stringify(userProfile.scores));
-            
-            check.rank = userProfile.scores.findIndex(e => e.name === userProfile.name && e.score === finalScore && !e.bot) + 1;
+            session.board.sort((a, b) => b.score - a.score);
+            session.board = session.board.slice(0, 6);
+            localStorage.setItem('ft_scores', JSON.stringify(session.board));
+
+            tracking.rank = session.board.findIndex(e => e.name === session.player && e.score === finalScore && !e.system) + 1;
         }
-        return check;
+        return tracking;
     }
 
-    // --- VISUAL RENDERING ENGINE ---
-    function renderFrameGraphics() {
-        // 1. Classic Blue Sky Daylight Gradient Environment
-        let skyG = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        skyG.addColorStop(0, '#1e3a8a');
-        skyG.addColorStop(0.6, '#3b82f6');
-        skyG.addColorStop(0.9, '#60a5fa');
-        ctx.fillStyle = skyG;
+    // --- VISUAL GRAPHICS RENDERING SYSTEM ---
+    function renderStaticBackgroundScenery() {
+        // Clear Sky Daylight Gradient Setup
+        let skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        skyGradient.addColorStop(0, '#1d4ed8');   // Rich deeper blue top
+        skyGradient.addColorStop(0.5, '#3b82f6'); // Solid stadium blue midpoint
+        skyGradient.addColorStop(0.9, '#60a5fa'); // Vibrant sky light base glow
+        ctx.fillStyle = skyGradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 2. Pitch Alternating Dark/Light Green Grass Tiers at base
-        let pitchY = canvas.height - 40;
-        for (let x = 0; x < canvas.width; x += 40) {
-            ctx.fillStyle = (x / 40 % 2 === 0) ? '#15803d' : '#166534';
-            ctx.fillRect(x, pitchY, 40, 40);
+        // Alternating Striped Pitch Grass Tiers at base bounds
+        let grassBaseY = canvas.height - 40;
+        for (let horizontalX = 0; horizontalX < canvas.width; horizontalX += 40) {
+            ctx.fillStyle = (horizontalX / 40 % 2 === 0) ? '#16a34a' : '#15803d';
+            ctx.fillRect(horizontalX, grassBaseY, 40, 40);
         }
-        // White touchline accent bounds
-        ctx.fillStyle = 'rgba(255,255,255,0.5)';
-        ctx.fillRect(0, pitchY, canvas.width, 3);
 
-        // 3. Render Solid Structural White/Sleek Posts (Tunnels)
-        tunnels.forEach(t => {
-            // Top White Goal Pillar Post
-            let postGrad = ctx.createLinearGradient(t.x, 0, t.x + 55, 0);
-            postGrad.addColorStop(0, '#e2e8f0');
-            postGrad.addColorStop(0.3, '#ffffff');
-            postGrad.addColorStop(1, '#cbd5e1');
-            
-            ctx.fillStyle = postGrad;
-            ctx.fillRect(t.x, 0, 55, t.topHeight);
-            
-            // Neon crossbar rim highlight caps
-            ctx.fillStyle = '#22d3ee';
-            ctx.fillRect(t.x - 2, t.topHeight - 5, 59, 5);
+        // Clean Solid Touchline Field Boundary White Accent Stripe
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.fillRect(0, grassBaseY, canvas.width, 3);
+    }
 
-            // Bottom White Goal Pillar Post
-            ctx.fillStyle = postGrad;
-            ctx.fillRect(t.x, t.bottomY, 55, canvas.height - t.bottomY - 40);
-            
-            ctx.fillStyle = '#22d3ee';
-            ctx.fillRect(t.x - 2, t.bottomY, 59, 5);
+    function renderActiveGraphicsLayers() {
+        // Draw static baseline layer environment elements
+        renderStaticBackgroundScenery();
+
+        // 1. Draw Moving Structural Goalposts (Pipes)
+        posts.forEach(p => {
+            let postColorGrad = ctx.createLinearGradient(p.x, 0, p.x + 55, 0);
+            postColorGrad.addColorStop(0, '#f1f5f9');
+            postColorGrad.addColorStop(0.4, '#ffffff');
+            postColorGrad.addColorStop(1, '#cbd5e1');
+
+            // Top White Goal Line Structure Post
+            ctx.fillStyle = postColorGrad;
+            ctx.fillRect(p.x, 0, 55, p.topHeight);
+            ctx.fillStyle = '#93c5fd';
+            ctx.fillRect(p.x - 1, p.topHeight - 4, 57, 4); // Highlight cap line
+
+            // Bottom White Goal Line Structure Post
+            ctx.fillStyle = postColorGrad;
+            ctx.fillRect(p.x, p.bottomY, 55, canvas.height - p.bottomY - 40);
+            ctx.fillStyle = '#93c5fd';
+            ctx.fillRect(p.x - 1, p.bottomY, 57, 4); // Highlight cap line
         });
 
-        // 4. Render Active Goalkeeper (Classic Red/Cyan Kits)
-        if (keeper.enabled) {
-            ctx.fillStyle = keeper.pattern === 'tracking' ? '#06b6d4' : '#ef4444';
+        // 2. Draw Active Goalkeeper Kits
+        if (keeper.active) {
+            ctx.fillStyle = keeper.mode === 'tracking' ? '#06b6d4' : '#ef4444';
             ctx.fillRect(keeper.x, keeper.y, keeper.width, keeper.height);
-            
-            // White Trim Highlights
+
+            // Clean White Striped Kit Trim
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(keeper.x + 4, keeper.y, 4, keeper.height);
             ctx.fillRect(keeper.x + keeper.width - 8, keeper.y, 4, keeper.height);
-            
-            // Keeper Gloves
+
+            // Colored Goalkeeper Gloves
             ctx.fillStyle = '#f59e0b';
             ctx.fillRect(keeper.x - 3, keeper.y + 12, 3, 8);
             ctx.fillRect(keeper.x + keeper.width, keeper.y + 12, 3, 8);
         }
 
-        // 5. Render High Polish Classic Soccer Matchball
+        // 3. Draw High-Contrast Classic Pentagonal Soccer Ball
         ctx.save();
-        ctx.translate(football.x, football.y);
-        ctx.rotate(football.radAngle);
-        
+        ctx.translate(ball.x, ball.y);
+        ctx.rotate(ball.angle);
+
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.arc(0, 0, football.radius, 0, Math.PI * 2);
+        ctx.arc(0, 0, ball.radius, 0, Math.PI * 2);
         ctx.fill();
-        
-        ctx.strokeStyle = '#0f172a';
+
+        ctx.strokeStyle = '#334155';
         ctx.lineWidth = 1.2;
-        for(let i=0; i<5; i++) {
+        for (let i = 0; i < 5; i++) {
             ctx.beginPath();
             ctx.moveTo(0, 0);
-            let a = (Math.PI * 2 / 5) * i;
-            ctx.lineTo(Math.cos(a) * football.radius, Math.sin(a) * football.radius);
+            let radialA = (Math.PI * 2 / 5) * i;
+            ctx.lineTo(Math.cos(radialA) * ball.radius, Math.sin(radialA) * ball.radius);
             ctx.stroke();
         }
         ctx.restore();
 
-        // 6. Particle Processing
-        particles.forEach(p => {
+        // 4. Render Active Floating Score Burst Particles
+        particles.forEach(pt => {
             ctx.save();
-            ctx.globalAlpha = p.alpha;
-            ctx.fillStyle = p.color;
+            ctx.globalAlpha = pt.alpha;
+            ctx.fillStyle = pt.color;
             ctx.beginPath();
-            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
         });
     }
 
-    // Launch Application
-    bootEngine();
+    // Launch Application Lifecycle immediately on load
+    initStadiumApp();
 </script>
 
 </body>
