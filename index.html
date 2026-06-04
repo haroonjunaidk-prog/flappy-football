@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <title>Play Flappy Football: Top Bins Edition - Free Arcade Browser Game</title>
     <meta name="description" content="Play Flappy Football: Top Bins Edition! Face narrow goalposts, bypass stationary blockers, and conquer rapid goalkeepers in this addictive browser arcade game.">
-    <meta name="keywords" content="flappy football, top bins, arcade football game, browser soccer game, play flappy bird football, free online games">
+    <meta name="keywords" content="flappy football, top bins, arcade football game, browser soccer game, play flappy bird football, free online games, soccer arcade">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://yourdomain.com/flappy-football" />
 
@@ -31,19 +31,61 @@
     </script>
 
     <style>
-        :root { --stadium-blue: #3b82f6; --grass-green: #22c55e; --gold: #fcd34d; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
+        /* ==========================================
+           UI & PRESENTATION LAYER
+        ========================================== */
+        :root { 
+            --stadium-blue: #3b82f6; 
+            --grass-green: #22c55e; 
+            --gold: #fcd34d; 
+            --text-light: #ffffff;
+            --danger-red: #e11d48;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
+        
         body { background: #1e293b; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
-        #game-box { position: relative; width: 500px; height: 530px; border: 6px solid #475569; border-radius: 16px; background: #3b82f6; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        
+        #game-box { 
+            position: relative; 
+            width: 500px; 
+            height: 530px; 
+            border: 8px solid #475569; 
+            border-radius: 20px; 
+            background: #3b82f6; 
+            overflow: hidden; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); 
+        }
+
         canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
-        .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(6px); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; transition: opacity 0.2s; }
+
+        .ui-layer { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; 
+            background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(8px); 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            padding: 30px; transition: opacity 0.3s ease; 
+        }
+        
         .hidden { opacity: 0; pointer-events: none; }
-        h1 { font-size: 2.2rem; font-weight: 900; color: #ffffff; text-transform: uppercase; margin-bottom: 10px; text-shadow: 0 4px 8px rgba(0,0,0,0.3); }
-        .btn { background: #22c55e; color: white; border: none; padding: 12px 24px; font-weight: bold; border-radius: 8px; cursor: pointer; text-transform: uppercase; margin: 5px; transition: transform 0.1s; }
-        .btn:hover { transform: scale(1.05); }
-        #username-field { background: rgba(0,0,0,0.3); border: 2px solid #fff; color: white; padding: 10px; border-radius: 8px; margin-bottom: 10px; text-align: center; width: 200px; }
-        #game-hud { position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; pointer-events: none; z-index: 5; }
-        .hud-pill { background: rgba(15, 23, 42, 0.6); color: white; padding: 6px 12px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; }
+
+        h1 { font-size: 2.5rem; font-weight: 900; color: #ffffff; text-transform: uppercase; margin-bottom: 20px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        
+        .btn { 
+            background: #22c55e; color: white; border: none; padding: 15px 30px; 
+            font-size: 1.1rem; font-weight: bold; border-radius: 12px; cursor: pointer; 
+            text-transform: uppercase; margin: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); 
+            transition: transform 0.1s, background 0.2s; 
+        }
+        .btn:hover { transform: scale(1.05); background: #16a34a; }
+        
+        #username-field { 
+            background: rgba(0,0,0,0.3); border: 3px solid #fff; color: white; 
+            padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; 
+            width: 250px; font-size: 1.2rem; outline: none; 
+        }
+
+        #game-hud { position: absolute; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; pointer-events: none; z-index: 5; }
+        .hud-pill { background: rgba(15, 23, 42, 0.8); color: white; padding: 8px 16px; border-radius: 10px; font-weight: bold; font-size: 1rem; border: 2px solid rgba(255,255,255,0.2); }
     </style>
 </head>
 <body>
@@ -55,8 +97,8 @@
     </div>
 
     <div id="layer-username" class="ui-layer">
-        <h1>STRIKER PROFILE</h1>
-        <input type="text" id="username-field" placeholder="INITIALS" maxlength="12">
+        <h1>STRIKER</h1>
+        <input type="text" id="username-field" placeholder="ENTER INITIALS" maxlength="10">
         <button id="btn-save-profile" class="btn">Enter Arena</button>
     </div>
 
@@ -64,12 +106,12 @@
         <h1>TOP BINS</h1>
         <button id="opt-endless" class="btn">Endless Run</button>
         <button id="opt-stages" class="btn">Stage Mode</button>
-        <div id="dashboard-lb-rows" style="margin-top:20px; color:white; font-size: 0.8rem; text-align: center;"></div>
+        <div id="dashboard-lb-rows" style="margin-top:20px; color:white; font-size: 0.9rem; text-align: center; width: 100%;"></div>
     </div>
 
     <div id="layer-stages" class="ui-layer hidden">
         <h1>SELECT STAGE</h1>
-        <div style="display:flex; gap:10px;">
+        <div style="display:flex; gap:15px;">
             <button class="stage-node btn" data-stg="1">Stage 1</button>
             <button class="stage-node btn" data-stg="2">Stage 2</button>
             <button class="stage-node btn" data-stg="3">Stage 3</button>
@@ -79,7 +121,7 @@
 
     <div id="layer-matchover" class="ui-layer hidden">
         <h1 id="mo-title">FULL TIME</h1>
-        <p id="mo-stats" style="color:white; margin-bottom:20px; font-size: 1.2rem;"></p>
+        <p id="mo-stats" style="color:white; margin-bottom:20px; font-size: 1.5rem;"></p>
         <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
             <button id="btn-rematch" class="btn">Rematch</button>
             <button id="btn-next-stage" class="btn hidden">Next Level</button>
@@ -91,7 +133,22 @@
 </div>
 
 <script>
-    // --- APP STATE ---
+    /* ==========================================
+       GAME ENGINE & STATE MANAGEMENT
+    ========================================== */
+    
+    // Configuration Object
+    const CONFIG = {
+        gravity: 0.22,
+        jumpForce: -5.5,
+        dashForce: 8,
+        forwardSpeed: 2.6,
+        gapSize: 125,
+        ballSize: 13,
+        cushion: 4 // Hitbox adjustment
+    };
+
+    // State Variables
     let session = {
         player: localStorage.getItem('ft_user') || '',
         highestUnlocked: parseInt(localStorage.getItem('ft_highstg')) || 1,
@@ -102,76 +159,155 @@
     
     const canvas = document.getElementById('arenaCanvas');
     const ctx = canvas.getContext('2d');
-    const BALANCER = { gravity: 0.22, jumpForce: -5.5, dashForce: 6, forwardSpeed: 2.4, gapSize: 125, ballSize: 13 };
     
-    let isRunning = false, score = 0, posts = [], keeper = {}, ball = {}, currentMode = 'endless', currentStage = 1;
+    let isRunning = false, score = 0, posts = [], particles = [], keeper = {}, ball = {}, currentMode = 'endless', currentStage = 1;
 
-    // --- INPUTS ---
-    window.addEventListener('keydown', (e) => {
-        if (!isRunning) return;
-        const isJump = e.code === 'KeyA' || e.key === 'ArrowUp' || e.code === 'Space';
-        const isDash = e.code === 'KeyD' || e.key === 'ArrowRight';
-        if (isJump) ball.velocity = BALANCER.jumpForce;
-        if (isDash) ball.x += BALANCER.dashForce * 8; // Instant forward dash
-    });
-
-    // --- GAME ENGINE ---
-    function setupMatchSession() {
-        popUI(null);
-        document.getElementById('game-hud').classList.remove('hidden');
-        score = 0; posts = []; isRunning = true;
-        ball = { x: 130, y: 180, velocity: 0, angle: 0, radius: BALANCER.ballSize };
-        keeper = { active: false, x: 0, y: 0, width: 30, height: 40, mode: 'none' };
-        spawnGoalpostUnit(460);
-        spawnGoalpostUnit(460 + 220);
-        requestAnimationFrame(engineLoop);
+    // --- GAME ENGINE INITIALIZATION ---
+    function initApp() {
+        if (session.player) popUI('layer-dashboard');
+        else popUI('layer-username');
+        updateLeaderboardDisplay();
     }
 
-    function engineLoop() {
-        if (!isRunning) return;
+    function startGameSession() {
+        popUI(null);
+        document.getElementById('game-hud').classList.remove('hidden');
+        score = 0; posts = []; particles = []; isRunning = true;
         
-        ball.velocity += BALANCER.gravity;
+        ball = { x: 130, y: 180, velocity: 0, angle: 0, radius: CONFIG.ballSize };
+        keeper = { active: false, x: 0, y: 0, width: 30, height: 40, mode: 'none', lockedY: null };
+        
+        spawnGoalpostUnit(460);
+        spawnGoalpostUnit(460 + 220);
+        
+        requestAnimationFrame(gameLoop);
+    }
+
+    // --- CORE GAME LOOP ---
+    function gameLoop() {
+        if (!isRunning) return;
+        updateGamePhysics();
+        drawGameFrame();
+        requestAnimationFrame(gameLoop);
+    }
+
+    function updateGamePhysics() {
+        // Apply Gravity
+        ball.velocity += CONFIG.gravity;
         ball.y += ball.velocity;
         ball.angle += 0.05;
 
-        if (ball.y + ball.radius > canvas.height - 40 || ball.y - ball.radius < 0) return terminateMatchSession(false);
+        // Floor/Ceiling Collision
+        if (ball.y + ball.radius > canvas.height - 40 || ball.y - ball.radius < 0) {
+            terminateMatchSession(false);
+            return;
+        }
 
         let nearestPost = posts.find(p => p.x + 55 > ball.x - ball.radius);
-        updateKeeperLogic(nearestPost);
         
+        // Keeper Logic
+        updateKeeperBehavior(nearestPost);
+        
+        // Post & Collision Logic
         posts.forEach(p => {
-            p.x -= BALANCER.forwardSpeed;
+            p.x -= CONFIG.forwardSpeed;
+            
+            // Check Collision with Post
             if (ball.x + ball.radius > p.x && ball.x - ball.radius < p.x + 55) {
-                if (ball.y - ball.radius < p.topHeight || ball.y + ball.radius > p.bottomY) return terminateMatchSession(false);
+                if (ball.y - ball.radius < p.topHeight || ball.y + ball.radius > p.bottomY) {
+                    terminateMatchSession(false);
+                }
             }
-            if (!p.scored && p.x + 25 < ball.x) { p.scored = true; score++; updateHUD(); }
+            
+            // Check Collision with Keeper
+            if (keeper.active && ball.x + ball.radius > keeper.x && ball.x - ball.radius < keeper.x + keeper.width &&
+                ball.y + ball.radius > keeper.y && ball.y - ball.radius < keeper.y + keeper.height) {
+                terminateMatchSession(false);
+            }
+
+            // Scoring
+            if (!p.scored && p.x + 25 < ball.x) { 
+                p.scored = true; 
+                score++; 
+                spawnExplosion(ball.x, ball.y); 
+                updateHUD(); 
+            }
         });
 
+        // Cleanup & Spawn
         if (posts[posts.length - 1].x < canvas.width - 220) spawnGoalpostUnit(canvas.width);
-        if (posts[0] && posts[0].x < -60) posts.shift();
+        if (posts[0] && posts[0].x < -60) { posts.shift(); keeper.lockedY = null; }
 
-        render();
-        requestAnimationFrame(engineLoop);
+        // Particle updates
+        particles.forEach((p, i) => {
+            p.x += p.vx; p.y += p.vy; p.alpha -= 0.02;
+            if (p.alpha <= 0) particles.splice(i, 1);
+        });
     }
 
-    function updateKeeperLogic(p) {
-        if (!p) return;
+    // --- AI & BEHAVIORS ---
+    function updateKeeperBehavior(post) {
+        if (!post) return;
         keeper.active = false;
-        if (currentMode === 'endless') {
-            if (score > 10 && score <= 20) { keeper.active = true; keeper.mode = 'still'; keeper.x = p.x + 10; keeper.y = p.topHeight + (Math.random() < 0.5 ? 5 : BALANCER.gapSize - 45); }
-            else if (score > 20) { keeper.active = true; keeper.mode = 'patrol'; keeper.x = p.x + 10; }
-        } else {
-            if (currentStage === 2) { keeper.active = true; keeper.mode = 'still'; keeper.x = p.x + 10; keeper.y = p.topHeight + (Math.random() < 0.5 ? 5 : BALANCER.gapSize - 45); }
-            else if (currentStage === 3) { keeper.active = true; keeper.mode = 'patrol'; keeper.x = p.x + 10; }
-        }
         
-        // Patrol Logic
-        if(keeper.mode === 'patrol') {
-            keeper.y = p.topHeight + (Math.sin(Date.now() * 0.005) * (BALANCER.gapSize - 45)) + 5;
+        let targetScore = (currentMode === 'endless') ? score : (currentStage * 10);
+        
+        // Phase/Stage Logic
+        if ((currentMode === 'endless' && score > 10) || (currentMode === 'stages' && currentStage >= 2)) {
+            // Check if we are in "Stationary" or "Patrol" phase
+            let isPatrol = (currentMode === 'endless' && score > 20) || (currentMode === 'stages' && currentStage === 3);
+            
+            keeper.active = true;
+            keeper.x = post.x + 10;
+            
+            if (!isPatrol) {
+                keeper.mode = 'still';
+                if (keeper.lockedY === null) keeper.lockedY = post.topHeight + (Math.random() < 0.5 ? 5 : CONFIG.gapSize - 45);
+                keeper.y = keeper.lockedY;
+            } else {
+                keeper.mode = 'patrol';
+                keeper.y = post.topHeight + (Math.sin(Date.now() * 0.005) * (CONFIG.gapSize - 45)) + 5;
+            }
         }
+    }
+
+    // --- RENDERING ---
+    function drawGameFrame() {
+        // Draw Sky/Grass
+        ctx.fillStyle = '#3b82f6'; ctx.fillRect(0,0,500,530);
+        ctx.fillStyle = '#16a34a'; ctx.fillRect(0, 490, 500, 40);
+        
+        // Draw Posts
+        posts.forEach(p => { 
+            ctx.fillStyle = '#fff'; ctx.fillRect(p.x, 0, 55, p.topHeight); 
+            ctx.fillRect(p.x, p.bottomY, 55, 530); 
+        });
+
+        // Draw Keeper
+        if (keeper.active) { ctx.fillStyle = '#e11d48'; ctx.fillRect(keeper.x, keeper.y, 30, 40); }
+        
+        // Draw Ball
+        ctx.save();
+        ctx.translate(ball.x, ball.y);
+        ctx.rotate(ball.angle);
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(0, 0, CONFIG.ballSize, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
+
+        // Draw Particles
+        particles.forEach(p => {
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = '#fcd34d'; ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI*2); ctx.fill();
+        });
+        ctx.globalAlpha = 1.0;
     }
 
     // --- UI/UTILS ---
+    function spawnExplosion(x, y) {
+        for(let i=0; i<8; i++) {
+            particles.push({ x, y, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10, alpha: 1 });
+        }
+    }
+
     function popUI(id) {
         document.querySelectorAll('.ui-layer').forEach(l => l.classList.add('hidden'));
         if (id) document.getElementById(id).classList.remove('hidden');
@@ -185,44 +321,70 @@
     function terminateMatchSession(win) {
         isRunning = false;
         document.getElementById('mo-title').innerText = win ? "GOAL CLEARED" : "FULL TIME";
-        document.getElementById('mo-stats').innerText = `Score: ${score}`;
-        document.getElementById('btn-next-stage').classList.toggle('hidden', !(win && currentMode === 'stages' && currentStage < 3));
+        document.getElementById('mo-stats').innerText = `Final Score: ${score}`;
+        
+        let btnNext = document.getElementById('btn-next-stage');
+        btnNext.classList.toggle('hidden', !(win && currentMode === 'stages' && currentStage < 3));
+        
         popUI('layer-matchover');
+        
+        // Sync score for Endless
+        if (currentMode === 'endless') syncLeaderboard(score);
     }
 
     function spawnGoalpostUnit(x) {
         let h = Math.floor(Math.random() * 200) + 50;
-        posts.push({ x: x, topHeight: h, bottomY: h + BALANCER.gapSize, scored: false });
+        posts.push({ x: x, topHeight: h, bottomY: h + CONFIG.gapSize, scored: false });
     }
 
-    function render() {
-        ctx.fillStyle = '#3b82f6'; ctx.fillRect(0,0,500,530);
-        ctx.fillStyle = '#16a34a'; ctx.fillRect(0, 490, 500, 40);
-        posts.forEach(p => { ctx.fillStyle = '#fff'; ctx.fillRect(p.x, 0, 55, p.topHeight); ctx.fillRect(p.x, p.bottomY, 55, 530); });
-        if (keeper.active) { ctx.fillStyle = '#e11d48'; ctx.fillRect(keeper.x, keeper.y, 30, 40); }
-        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(ball.x, ball.y, 13, 0, Math.PI*2); ctx.fill();
+    function syncLeaderboard(finalScore) {
+        let isNew = session.board.some(r => r.name === session.player);
+        if(!isNew || finalScore > session.board.find(r=>r.name === session.player).score) {
+            session.board = session.board.filter(r => r.name !== session.player);
+            session.board.push({name: session.player, score: finalScore});
+            localStorage.setItem('ft_scores', JSON.stringify(session.board));
+        }
+        updateLeaderboardDisplay();
+    }
+
+    function updateLeaderboardDisplay() {
+        const rows = document.getElementById('dashboard-lb-rows');
+        rows.innerHTML = '<strong>TOP FIELD RECORDS</strong><br>';
+        session.board.sort((a,b) => b.score - a.score).slice(0,5).forEach(entry => {
+            rows.innerHTML += `${entry.name}: ${entry.score}G<br>`;
+        });
     }
 
     // --- EVENT LISTENERS ---
+    window.addEventListener('keydown', (e) => {
+        if (!isRunning) return;
+        if (e.code === 'KeyA' || e.key === 'ArrowUp' || e.code === 'Space') ball.velocity = CONFIG.jumpForce;
+        if (e.code === 'KeyD' || e.key === 'ArrowRight') ball.x += CONFIG.dashForce * 5;
+    });
+
     document.getElementById('btn-save-profile').onclick = () => {
         let val = document.getElementById('username-field').value.toUpperCase();
-        if (val.length < 2) return alert("Enter a name!");
-        if (session.board.some(r => r.name === val)) alert('This name is already taken!');
-        else { session.player = val; localStorage.setItem('ft_user', val); popUI('layer-dashboard'); }
+        if (val.length < 2) return alert("Enter valid name!");
+        if (session.board.some(r => r.name === val)) return alert('Name already taken!');
+        session.player = val; localStorage.setItem('ft_user', val); popUI('layer-dashboard');
     };
-    document.getElementById('opt-endless').onclick = () => { currentMode = 'endless'; setupMatchSession(); };
+
+    document.getElementById('opt-endless').onclick = () => { currentMode = 'endless'; startGameSession(); };
     document.getElementById('opt-stages').onclick = () => popUI('layer-stages');
-    document.getElementById('btn-next-stage').onclick = () => { currentStage++; setupMatchSession(); };
-    document.getElementById('btn-rematch').onclick = setupMatchSession;
+    document.getElementById('btn-next-stage').onclick = () => { currentStage++; startGameSession(); };
+    document.getElementById('btn-rematch').onclick = startGameSession;
+    
     document.querySelectorAll('.btn-to-hub').forEach(b => b.onclick = () => popUI('layer-dashboard'));
+    
     document.querySelectorAll('.stage-node').forEach(b => b.onclick = (e) => { 
         currentMode = 'stages'; 
         currentStage = parseInt(e.target.dataset.stg); 
-        if(currentStage <= session.highestUnlocked) setupMatchSession();
+        if(currentStage <= session.highestUnlocked) startGameSession();
         else alert("Level locked!");
     });
 
-    if(session.player) popUI('layer-dashboard');
+    // Run startup
+    initApp();
 </script>
 </body>
 </html>
