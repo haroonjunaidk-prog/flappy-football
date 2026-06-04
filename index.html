@@ -16,265 +16,39 @@
     <meta property="og:description" content="Test your timing against narrow gaps and adaptive goalkeepers. Play the game directly in your browser.">
     <meta property="og:image" content="https://yourdomain.com/assets/game-preview.jpg">
 
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://yourdomain.com/flappy-football">
-    <meta property="twitter:title" content="Flappy Football: Top Bins Edition">
-    <meta property="twitter:description" content="Dodge the keeper and smash it into the top bins.">
-    <meta property="twitter:image" content="https://yourdomain.com/assets/game-preview.jpg">
-
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "VideoGame",
       "name": "Flappy Football: Top Bins Edition",
-      "description": "An addictive browser-based arcade sports game where players fly a football through narrow goalposts and dodge various goalkeeper defensive setups.",
+      "description": "An addictive browser-based arcade sports game where players fly a football through narrow goalposts.",
       "genre": ["Arcade Game", "Sports Game"],
       "playMode": "SinglePlayer",
       "applicationCategory": "Game",
       "operatingSystem": "Windows, macOS, Android, iOS",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      }
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
     }
     </script>
 
     <style>
-        :root {
-            --stadium-blue: #3b82f6;
-            --grass-green: #22c55e;
-            --gold: #f59e0b;
-            --text-light: #ffffff;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        body {
-            background: #1e293b;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
-        }
-
-        #game-box {
-            position: relative;
-            width: 500px;
-            height: 530px;
-            border: 6px solid #475569;
-            border-radius: 16px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            overflow: hidden;
-            background: #3b82f6;
-            cursor: pointer;
-        }
-
-        canvas {
-            display: block;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-        }
-
-        .ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
-            background: rgba(30, 41, 59, 0.4);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 30px;
-            transition: opacity 0.2s ease;
-        }
-
-        .hidden {
-            opacity: 0;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        h1 {
-            font-size: 2.4rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            color: #ffffff;
-            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            margin-bottom: 5px;
-            text-align: center;
-        }
-        h1 span { color: #cfffa3; }
-
-        .tagline {
-            color: #e2e8f0;
-            font-size: 0.95rem;
-            margin-bottom: 20px;
-            font-weight: 500;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .menu-grid {
-            display: grid;
-            grid-template-columns: 1.10fr 0.90fr;
-            gap: 15px;
-            width: 100%;
-            height: 60%;
-        }
-
-        .left-menu-column {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .option-card {
-            background: rgba(255, 255, 255, 0.15);
-            border: 2px solid rgba(255, 255, 255, 0.25);
-            border-radius: 12px;
-            padding: 14px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-        .option-card:hover {
-            background: rgba(255, 255, 255, 0.25);
-            border-color: #ffffff;
-            transform: scale(1.02);
-        }
-        .option-card h3 { font-size: 1.1rem; margin-bottom: 2px; }
-        .option-card p { font-size: 0.8rem; color: #f1f5f9; }
-
-        .leaderboard-container {
-            background: rgba(15, 23, 42, 0.4);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-        }
-        .leaderboard-header {
-            font-size: 0.85rem;
-            font-weight: 800;
-            color: #fcd34d;
-            text-transform: uppercase;
-            text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            padding-bottom: 5px;
-            margin-bottom: 8px;
-        }
-        .leaderboard-rows { display: flex; flex-direction: column; gap: 5px; }
-        .leaderboard-row {
-            display: flex;
-            justify-content: space-between;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 5px 8px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            color: white;
-        }
-        .leaderboard-row.current-player {
-            border: 1px solid #ffffff;
-            background: rgba(59, 130, 246, 0.4);
-        }
-
-        #username-field {
-            background: rgba(15, 23, 42, 0.6);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            text-align: center;
-            margin-bottom: 15px;
-            width: 250px;
-            outline: none;
-        }
-        #username-field:focus { border-color: #ffffff; }
-
-        .stages-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            width: 100%;
-            margin: 20px 0;
-        }
-        .stage-node {
-            background: rgba(255, 255, 255, 0.15);
-            border: 2px solid rgba(255, 255, 255, 0.25);
-            border-radius: 12px;
-            padding: 18px 5px;
-            text-align: center;
-            color: white;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-        .stage-node:hover:not(.locked) {
-            background: rgba(255, 255, 255, 0.25);
-            border-color: #ffffff;
-            transform: translateY(-2px);
-        }
-        .stage-node.locked { opacity: 0.3; cursor: not-allowed; border-style: dashed; }
-        .stage-node h4 { font-size: 1.2rem; }
-        .stage-node span { font-size: 0.75rem; color: #fcd34d; font-weight: bold; }
-
-        #game-hud {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            right: 15px;
-            display: flex;
-            justify-content: space-between;
-            pointer-events: none;
-            z-index: 5;
-        }
-        .hud-pill {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 0.95rem;
-        }
-
-        .btn {
-            background: #22c55e;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 1rem;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            text-transform: uppercase;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            transition: all 0.15s ease;
-        }
-        .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(0,0,0,0.3); }
+        :root { --stadium-blue: #3b82f6; --grass-green: #22c55e; --gold: #fcd34d; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
+        body { background: #1e293b; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+        #game-box { position: relative; width: 500px; height: 530px; border: 6px solid #475569; border-radius: 16px; background: #3b82f6; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
+        .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(6px); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; transition: opacity 0.2s; }
+        .hidden { opacity: 0; pointer-events: none; }
+        h1 { font-size: 2.2rem; font-weight: 900; color: #ffffff; text-transform: uppercase; margin-bottom: 10px; text-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+        .btn { background: #22c55e; color: white; border: none; padding: 12px 24px; font-weight: bold; border-radius: 8px; cursor: pointer; text-transform: uppercase; margin: 5px; transition: transform 0.1s; }
+        .btn:hover { transform: scale(1.05); }
+        #username-field { background: rgba(0,0,0,0.3); border: 2px solid #fff; color: white; padding: 10px; border-radius: 8px; margin-bottom: 10px; text-align: center; width: 200px; }
+        #game-hud { position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; pointer-events: none; z-index: 5; }
+        .hud-pill { background: rgba(15, 23, 42, 0.6); color: white; padding: 6px 12px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
 <div id="game-box">
-
     <div id="game-hud" class="hidden">
         <div id="hud-score" class="hud-pill">Goals: 0</div>
         <div id="hud-phase" class="hud-pill">Phase 1</div>
@@ -282,583 +56,173 @@
 
     <div id="layer-username" class="ui-layer">
         <h1>STRIKER PROFILE</h1>
-        <p class="tagline">Setup your kit to synchronize match scoring boards</p>
-        <input type="text" id="username-field" placeholder="INITIALS / NAME" maxlength="12">
+        <input type="text" id="username-field" placeholder="INITIALS" maxlength="12">
         <button id="btn-save-profile" class="btn">Enter Arena</button>
     </div>
 
     <div id="layer-dashboard" class="ui-layer hidden">
-        <h1>TOP BINS <span>ARENA</span></h1>
-        <p id="player-welcome-tag" class="tagline">Welcome Pro Striker</p>
-
-        <div class="menu-grid">
-            <div class="left-menu-column">
-                <div class="option-card" id="opt-endless">
-                    <h3>🏆 Endless Run</h3>
-                    <p>Survive progressive defense phases. Top the leaderboards.</p>
-                </div>
-                <div class="option-card" id="opt-stages">
-                    <h3>🕹️ Stage Mode</h3>
-                    <p>Clear tactical milestone scenario goals across 3 levels.</p>
-                </div>
-            </div>
-            <div class="leaderboard-container">
-                <div class="leaderboard-header">Top Field Records</div>
-                <div class="leaderboard-rows" id="dashboard-lb-rows"></div>
-            </div>
-        </div>
+        <h1>TOP BINS</h1>
+        <button id="opt-endless" class="btn">Endless Run</button>
+        <button id="opt-stages" class="btn">Stage Mode</button>
+        <div id="dashboard-lb-rows" style="margin-top:20px; color:white; font-size: 0.8rem; text-align: center;"></div>
     </div>
 
     <div id="layer-stages" class="ui-layer hidden">
         <h1>SELECT STAGE</h1>
-        <p class="tagline">Hit the target milestones to clear your sheet</p>
-
-        <div class="stages-row">
-            <div class="stage-node" data-stg="1">
-                <h4>Stage 1</h4>
-                <span>Target: 10</span>
-            </div>
-            <div class="stage-node" data-stg="2" id="stg-node-2">
-                <h4>Stage 2</h4>
-                <span>Target: 15</span>
-            </div>
-            <div class="stage-node" data-stg="3" id="stg-node-3">
-                <h4>Stage 3</h4>
-                <span>Target: 20</span>
-            </div>
+        <div style="display:flex; gap:10px;">
+            <button class="stage-node btn" data-stg="1">Stage 1</button>
+            <button class="stage-node btn" data-stg="2">Stage 2</button>
+            <button class="stage-node btn" data-stg="3">Stage 3</button>
         </div>
-
-        <button class="btn btn-to-hub" style="background: #64748b; padding: 8px 16px; font-size: 0.85rem;">Dashboard Hub</button>
+        <button class="btn btn-to-hub" style="background:#64748b;">Dashboard</button>
     </div>
 
     <div id="layer-matchover" class="ui-layer hidden">
         <h1 id="mo-title">FULL TIME</h1>
-        <p id="mo-stats" style="font-size: 1.15rem; color: white; margin-bottom: 5px; font-weight: bold;">Goals: 0</p>
-        <p id="mo-alert" style="color: #fcd34d; font-size: 0.85rem; font-weight: 800; margin-bottom: 25px; min-height: 18px; text-align: center;"></p>
-
-        <div style="display: flex; gap: 12px;">
+        <p id="mo-stats" style="color:white; margin-bottom:20px; font-size: 1.2rem;"></p>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
             <button id="btn-rematch" class="btn">Rematch</button>
-            <button class="btn btn-to-hub" style="background: #64748b;">Main Menu</button>
+            <button id="btn-next-stage" class="btn hidden">Next Level</button>
+            <button class="btn btn-to-hub" style="background:#64748b;">Menu</button>
         </div>
     </div>
 
     <canvas id="arenaCanvas" width="500" height="530"></canvas>
-
 </div>
 
 <script>
-    const MOCK_BOARD = [
-        { name: "🐐 MESSI BOT", score: 15, system: true },
-        { name: "🤖 RONALDO BOT", score: 12, system: true },
-        { name: "🇧🇷 NEYMAR BOT", score: 9, system: true },
-        { name: "💎 YAMAL BOT", score: 7, system: true },
-        { name: "⚡ MBAPPE BOT", score: 5, system: true },
-        { name: "🦁 ZLATAN BOT", score: 3, system: true }
-    ];
-
+    // --- APP STATE ---
     let session = {
         player: localStorage.getItem('ft_user') || '',
         highestUnlocked: parseInt(localStorage.getItem('ft_highstg')) || 1,
-        board: JSON.parse(localStorage.getItem('ft_scores')) || MOCK_BOARD
+        board: JSON.parse(localStorage.getItem('ft_scores')) || [
+            {name: "MESSI BOT", score: 15}, {name: "RONALDO BOT", score: 12}, {name: "NEYMAR BOT", score: 9}
+        ]
     };
-
+    
     const canvas = document.getElementById('arenaCanvas');
     const ctx = canvas.getContext('2d');
-    const gameBox = document.getElementById('game-box');
+    const BALANCER = { gravity: 0.22, jumpForce: -5.5, dashForce: 6, forwardSpeed: 2.4, gapSize: 125, ballSize: 13 };
+    
+    let isRunning = false, score = 0, posts = [], keeper = {}, ball = {}, currentMode = 'endless', currentStage = 1;
 
-    const BALANCER = {
-        gravity: 0.22,
-        jumpForce: -5.5,
-        forwardSpeed: 2.4,
-        spacing: 220,
-        gapSize: 125, // HARDCORE TUNNEL SIZE TUNED DOWN FROM 165
-        ballSize: 13,
-        cushion: 3.5 
-    };
-
-    let animationFrameId = null;
-    let isRunning = false;
-    let currentMode = 'endless'; 
-    let currentStage = 1;
-
-    let ball = {};
-    let posts = [];
-    let keeper = {};
-    let score = 0;
-    let particles = [];
-
-    function initStadiumApp() {
-        renderStaticBackgroundScenery();
-        if (!session.player) {
-            popUI('layer-username');
-        } else {
-            loadDashboardHub();
-        }
-    }
-
-    // UNIQUE PROFILE CLONING PREVENTION BLOCK
-    document.getElementById('btn-save-profile').addEventListener('click', (e) => {
-        e.stopPropagation();
-        let input = document.getElementById('username-field').value.trim().toUpperCase();
-        
-        if (input.length < 2) {
-            alert('Enter a valid striker profile name (min 2 characters).');
-            return;
-        }
-
-        // Search registry database to protect identity strings
-        let nameExists = session.board.some(record => record.name === input);
-
-        if (nameExists) {
-            alert('This name is already taken!');
-            return;
-        }
-
-        session.player = input;
-        localStorage.setItem('ft_user', session.player);
-        loadDashboardHub();
-    });
-
-    function popUI(uiId) {
-        document.querySelectorAll('.ui-layer').forEach(layer => layer.classList.add('hidden'));
-        document.getElementById('game-hud').classList.add('hidden');
-        if (uiId) document.getElementById(uiId).classList.remove('hidden');
-    }
-
-    function loadDashboardHub() {
-        document.getElementById('player-welcome-tag').innerText = `ACTIVE PRO STRIKER: ${session.player} ⚽`;
-        renderLeaderboardDOM();
-        popUI('layer-dashboard');
-    }
-
-    function renderLeaderboardDOM() {
-        const parent = document.getElementById('dashboard-lb-rows');
-        parent.innerHTML = '';
-        
-        session.board.sort((a, b) => b.score - a.score);
-        session.board = session.board.slice(0, 6);
-        localStorage.setItem('ft_scores', JSON.stringify(session.board));
-
-        session.board.forEach((record, index) => {
-            let item = document.createElement('div');
-            let matched = (record.name === session.player && !record.system);
-            item.className = `leaderboard-row ${matched ? 'current-player' : ''}`;
-            item.innerHTML = `<span>#${index + 1} ${record.name}</span><span>${record.score} G</span>`;
-            parent.appendChild(item);
-        });
-    }
-
-    document.getElementById('opt-endless').addEventListener('click', (e) => {
-        e.stopPropagation();
-        currentMode = 'endless';
-        setupMatchSession();
-    });
-
-    document.getElementById('opt-stages').addEventListener('click', (e) => {
-        e.stopPropagation();
-        document.getElementById('stg-node-2').className = `stage-node ${session.highestUnlocked < 2 ? 'locked' : ''}`;
-        document.getElementById('stg-node-3').className = `stage-node ${session.highestUnlocked < 3 ? 'locked' : ''}`;
-        popUI('layer-stages');
-    });
-
-    document.querySelectorAll('.stage-node').forEach(node => {
-        node.addEventListener('click', function(e) {
-            e.stopPropagation();
-            let stg = parseInt(this.getAttribute('data-stg'));
-            if (stg <= session.highestUnlocked) {
-                currentMode = 'stages';
-                currentStage = stg;
-                setupMatchSession();
-            }
-        });
-    });
-
-    document.querySelectorAll('.btn-to-hub').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            loadDashboardHub();
-        });
-    });
-
-    document.getElementById('btn-rematch').addEventListener('click', (e) => {
-        e.stopPropagation();
-        setupMatchSession();
-    });
-
-    function setupMatchSession() {
-        popUI(null); 
-        document.getElementById('game-hud').classList.remove('hidden');
-
-        score = 0;
-        posts = [];
-        particles = [];
-        isRunning = true;
-
-        ball = {
-            x: 130, y: 180,
-            radius: BALANCER.ballSize,
-            velocity: 0, angle: 0
-        };
-
-        keeper = {
-            x: 0, y: 150,
-            width: 32, height: 50,
-            speed: 2.6, direction: 1,
-            active: false, mode: 'none'
-        };
-
-        refreshHUDDisplay();
-
-        spawnGoalpostUnit(460);
-        spawnGoalpostUnit(460 + BALANCER.spacing);
-
-        if (animationFrameId) cancelAnimationFrame(animationFrameId);
-        animationFrameId = requestAnimationFrame(engineProcessingCore);
-    }
-
-    window.removeEventListener('keydown', executeGlobalJumpAction);
-    window.addEventListener('keydown', executeGlobalJumpAction);
-
-    gameBox.removeEventListener('mousedown', executeClickJumpAction);
-    gameBox.addEventListener('mousedown', executeClickJumpAction);
-
-    gameBox.removeEventListener('touchstart', executeTouchJumpAction);
-    gameBox.addEventListener('touchstart', executeTouchJumpAction, { passive: false });
-
-    function executeGlobalJumpAction(e) {
-        const isArrowKey = e.key.startsWith('Arrow');
-        const isAKey = e.code === 'KeyA' || e.key === 'a' || e.key === 'A';
-        const isSpaceKey = e.code === 'Space';
-
-        if ((isSpaceKey || isArrowKey || isAKey) && isRunning) {
-            e.preventDefault();
-            ball.velocity = BALANCER.jumpForce;
-        }
-    }
-
-    function executeClickJumpAction(e) {
-        if (isRunning) {
-            ball.velocity = BALANCER.jumpForce;
-        }
-    }
-
-    function executeTouchJumpAction(e) {
-        if (isRunning) {
-            e.preventDefault(); 
-            ball.velocity = BALANCER.jumpForce;
-        }
-    }
-
-    function spawnGoalpostUnit(targetX) {
-        let pad = 60;
-        let groundCut = canvas.height - 40 - BALANCER.gapSize - pad;
-        let finalTopH = Math.floor(Math.random() * (groundCut - pad + 1)) + pad;
-
-        posts.push({
-            x: targetX,
-            topHeight: finalTopH,
-            bottomY: finalTopH + BALANCER.gapSize,
-            scored: false
-        });
-    }
-
-    function refreshHUDDisplay() {
-        document.getElementById('hud-score').innerText = `Goals: ${score}`;
-        let label = document.getElementById('hud-phase');
-
-        if (currentMode === 'endless') {
-            if (score <= 10) label.innerHTML = `<span style="color:#22c55e">Phase 1: Deep Tunnel</span>`;
-            else if (score <= 20) label.innerHTML = `<span style="color:#3b82f6">Phase 2: Block Wall</span>`;
-            else label.innerHTML = `<span style="color:#ef4444">Phase 3: Rapid Box</span>`;
-        } else {
-            let target = currentStage === 1 ? 10 : currentStage === 2 ? 15 : 20;
-            label.innerHTML = `<span style="color:#fcd34d">Stage ${currentStage} (Target: ${target})</span>`;
-        }
-    }
-
-    function engineProcessingCore() {
+    // --- INPUTS ---
+    window.addEventListener('keydown', (e) => {
         if (!isRunning) return;
+        const isJump = e.code === 'KeyA' || e.key === 'ArrowUp' || e.code === 'Space';
+        const isDash = e.code === 'KeyD' || e.key === 'ArrowRight';
+        if (isJump) ball.velocity = BALANCER.jumpForce;
+        if (isDash) ball.x += BALANCER.dashForce * 8; // Instant forward dash
+    });
 
-        updateEntitiesLogic();
-        renderActiveGraphicsLayers();
-
-        animationFrameId = requestAnimationFrame(engineProcessingCore);
+    // --- GAME ENGINE ---
+    function setupMatchSession() {
+        popUI(null);
+        document.getElementById('game-hud').classList.remove('hidden');
+        score = 0; posts = []; isRunning = true;
+        ball = { x: 130, y: 180, velocity: 0, angle: 0, radius: BALANCER.ballSize };
+        keeper = { active: false, x: 0, y: 0, width: 30, height: 40, mode: 'none' };
+        spawnGoalpostUnit(460);
+        spawnGoalpostUnit(460 + 220);
+        requestAnimationFrame(engineLoop);
     }
 
-    function updateEntitiesLogic() {
+    function engineLoop() {
+        if (!isRunning) return;
+        
         ball.velocity += BALANCER.gravity;
         ball.y += ball.velocity;
-        ball.angle += 0.06;
+        ball.angle += 0.05;
 
-        if (ball.y + ball.radius > canvas.height - 40 || ball.y - ball.radius < 0) {
-            terminateMatchSession(false);
-            return;
-        }
+        if (ball.y + ball.radius > canvas.height - 40 || ball.y - ball.radius < 0) return terminateMatchSession(false);
 
         let nearestPost = posts.find(p => p.x + 55 > ball.x - ball.radius);
-
-        evaluateGoalkeeperAIBehavior(nearestPost);
-
-        if (keeper.active) {
-            if (keeper.mode === 'still') {
-                // FIXED STATIONARY LOGIC FOR PHASE 2
-                if (nearestPost) {
-                    keeper.x = nearestPost.x + 12;
-                    keeper.y = nearestPost.topHeight + (BALANCER.gapSize / 2) - (keeper.height / 2);
-                }
-            } else if (keeper.mode === 'vertical') {
-                // UNCHANGED UNTOUCHED PHASE 3 PATROL PATTERN
-                keeper.y += keeper.speed * keeper.direction;
-                if (nearestPost) {
-                    if (keeper.y < nearestPost.topHeight + 3 || keeper.y + keeper.height > nearestPost.bottomY - 3) {
-                        keeper.direction *= -1; 
-                    }
-                }
+        updateKeeperLogic(nearestPost);
+        
+        posts.forEach(p => {
+            p.x -= BALANCER.forwardSpeed;
+            if (ball.x + ball.radius > p.x && ball.x - ball.radius < p.x + 55) {
+                if (ball.y - ball.radius < p.topHeight || ball.y + ball.radius > p.bottomY) return terminateMatchSession(false);
             }
-        }
+            if (!p.scored && p.x + 25 < ball.x) { p.scored = true; score++; updateHUD(); }
+        });
 
-        for (let i = posts.length - 1; i >= 0; i--) {
-            let targetP = posts[i];
-            targetP.x -= BALANCER.forwardSpeed;
+        if (posts[posts.length - 1].x < canvas.width - 220) spawnGoalpostUnit(canvas.width);
+        if (posts[0] && posts[0].x < -60) posts.shift();
 
-            let bL = ball.x - ball.radius + BALANCER.cushion;
-            let bR = ball.x + ball.radius - BALANCER.cushion;
-            let bT = ball.y - ball.radius + BALANCER.cushion;
-            let bB = ball.y + ball.radius - BALANCER.cushion;
-
-            if (bR > targetP.x && bL < targetP.x + 55) {
-                if (bT < targetP.topHeight || bB > targetP.bottomY) {
-                    terminateMatchSession(false);
-                    return;
-                }
-            }
-
-            if (!targetP.scored && targetP.x + 25 < ball.x) {
-                targetP.scored = true;
-                score++;
-                refreshHUDDisplay();
-                igniteGoalExplosionFX();
-                evaluateStageVictoryParameters();
-            }
-
-            if (targetP.x < -70) posts.splice(i, 1);
-        }
-
-        if (keeper.active) {
-            let bL = ball.x - ball.radius + BALANCER.cushion;
-            let bR = ball.x + ball.radius - BALANCER.cushion;
-            let bT = ball.y - ball.radius + BALANCER.cushion;
-            let bB = ball.y + ball.radius - BALANCER.cushion;
-
-            if (bR > keeper.x && bL < keeper.x + keeper.width) {
-                if (bB > keeper.y && bT < keeper.y + keeper.height) {
-                    terminateMatchSession(false);
-                    return;
-                }
-            }
-        }
-
-        if (posts[posts.length - 1].x < canvas.width - BALANCER.spacing) {
-            spawnGoalpostUnit(canvas.width);
-        }
-
-        for (let i = particles.length - 1; i >= 0; i--) {
-            let pt = particles[i];
-            pt.x += pt.vX; pt.y += pt.vY; pt.alpha -= pt.decay;
-            if (pt.alpha <= 0) particles.splice(i, 1);
-        }
+        render();
+        requestAnimationFrame(engineLoop);
     }
 
-    function evaluateGoalkeeperAIBehavior(nearestPost) {
-        if (!nearestPost) return;
-
+    function updateKeeperLogic(p) {
+        if (!p) return;
+        keeper.active = false;
         if (currentMode === 'endless') {
-            if (score <= 10) {
-                keeper.active = false;
-            } else if (score <= 20) {
-                keeper.active = true;
-                keeper.mode = 'still';
-            } else {
-                keeper.active = true;
-                if (keeper.mode !== 'vertical') {
-                    keeper.mode = 'vertical';
-                    keeper.y = nearestPost.topHeight + 5;
-                    keeper.speed = 2.6;
-                }
-                keeper.x = nearestPost.x + 12;
-            }
+            if (score > 10 && score <= 20) { keeper.active = true; keeper.mode = 'still'; keeper.x = p.x + 10; keeper.y = p.topHeight + (Math.random() < 0.5 ? 5 : BALANCER.gapSize - 45); }
+            else if (score > 20) { keeper.active = true; keeper.mode = 'patrol'; keeper.x = p.x + 10; }
         } else {
-            if (currentStage === 1) {
-                keeper.active = false;
-            } else if (currentStage === 2) {
-                keeper.active = true;
-                keeper.mode = 'still';
-            } else {
-                keeper.active = true;
-                if (keeper.mode !== 'vertical') {
-                    keeper.mode = 'vertical';
-                    keeper.y = nearestPost.topHeight + 5;
-                    keeper.speed = 2.8;
-                }
-                keeper.x = nearestPost.x + 12;
-            }
+            if (currentStage === 2) { keeper.active = true; keeper.mode = 'still'; keeper.x = p.x + 10; keeper.y = p.topHeight + (Math.random() < 0.5 ? 5 : BALANCER.gapSize - 45); }
+            else if (currentStage === 3) { keeper.active = true; keeper.mode = 'patrol'; keeper.x = p.x + 10; }
+        }
+        
+        // Patrol Logic
+        if(keeper.mode === 'patrol') {
+            keeper.y = p.topHeight + (Math.sin(Date.now() * 0.005) * (BALANCER.gapSize - 45)) + 5;
         }
     }
 
-    function igniteGoalExplosionFX() {
-        for (let i = 0; i < 12; i++) {
-            particles.push({
-                x: ball.x + 15, y: ball.y,
-                vX: Math.random() * 3 + 2, vY: (Math.random() - 0.5) * 5,
-                radius: Math.random() * 3 + 1.5,
-                color: i % 2 === 0 ? '#cfffa3' : '#ffffff',
-                alpha: 1, decay: 0.04
-            });
-        }
+    // --- UI/UTILS ---
+    function popUI(id) {
+        document.querySelectorAll('.ui-layer').forEach(l => l.classList.add('hidden'));
+        if (id) document.getElementById(id).classList.remove('hidden');
     }
 
-    function evaluateStageVictoryParameters() {
-        if (currentMode !== 'stages') return;
-        let targetVal = currentStage === 1 ? 10 : currentStage === 2 ? 15 : 20;
-
-        if (score >= targetVal) {
-            if (currentStage === session.highestUnlocked && session.highestUnlocked < 3) {
-                session.highestUnlocked++;
-                localStorage.setItem('ft_highstg', session.highestUnlocked);
-            }
-            terminateMatchSession(true);
-        }
+    function updateHUD() {
+        document.getElementById('hud-score').innerText = `Goals: ${score}`;
+        document.getElementById('hud-phase').innerText = currentMode === 'endless' ? (score <= 10 ? 'Phase 1' : score <= 20 ? 'Phase 2' : 'Phase 3') : `Stage ${currentStage}`;
     }
 
-    function terminateMatchSession(isWinnerOutcome) {
+    function terminateMatchSession(win) {
         isRunning = false;
-        cancelAnimationFrame(animationFrameId);
-
-        let head = document.getElementById('mo-title');
-        let stats = document.getElementById('mo-stats');
-        let alertBar = document.getElementById('mo-alert');
-
-        alertBar.innerText = "";
-
-        if (isWinnerOutcome) {
-            head.innerHTML = "🏆 STAGE CLEARED";
-            stats.innerHTML = `Completed Stage ${currentStage} at ${score} Goals!`;
-            alertBar.innerText = currentStage === 3 ? "👑 CAMPAIGN COMPLETE - YOU ARE THE GOAT!" : "Next tactical stage tier unlocked successfully.";
-        } else {
-            head.innerHTML = "FULL TIME";
-            stats.innerText = `Final Score: ${score} Goals`;
-
-            if (currentMode === 'endless') {
-                let checkRegistry = syncLiveLeaderboardRecords(score);
-                if (checkRegistry.qualified) {
-                    alertBar.innerText = `🔥 Automatic Sync: Highscore Slot Verified #${checkRegistry.rank}!`;
-                }
-            }
-        }
+        document.getElementById('mo-title').innerText = win ? "GOAL CLEARED" : "FULL TIME";
+        document.getElementById('mo-stats').innerText = `Score: ${score}`;
+        document.getElementById('btn-next-stage').classList.toggle('hidden', !(win && currentMode === 'stages' && currentStage < 3));
         popUI('layer-matchover');
     }
 
-    function syncLiveLeaderboardRecords(finalScore) {
-        session.board.sort((a, b) => b.score - a.score);
-        let tracking = { qualified: false, rank: -1 };
-
-        if (session.board.length < 6 || finalScore > session.board[session.board.length - 1].score) {
-            tracking.qualified = true;
-            session.board.push({ name: session.player, score: finalScore, system: false });
-            
-            session.board.sort((a, b) => b.score - a.score);
-            session.board = session.board.slice(0, 6);
-            localStorage.setItem('ft_scores', JSON.stringify(session.board));
-
-            tracking.rank = session.board.findIndex(e => e.name === session.player && e.score === finalScore && !e.system) + 1;
-        }
-        return tracking;
+    function spawnGoalpostUnit(x) {
+        let h = Math.floor(Math.random() * 200) + 50;
+        posts.push({ x: x, topHeight: h, bottomY: h + BALANCER.gapSize, scored: false });
     }
 
-    function renderStaticBackgroundScenery() {
-        let skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        skyGradient.addColorStop(0, '#1d4ed8');   
-        skyGradient.addColorStop(0.5, '#3b82f6'); 
-        skyGradient.addColorStop(0.9, '#60a5fa'); 
-        ctx.fillStyle = skyGradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        let grassBaseY = canvas.height - 40;
-        for (let horizontalX = 0; horizontalX < canvas.width; horizontalX += 40) {
-            ctx.fillStyle = (horizontalX / 40 % 2 === 0) ? '#16a34a' : '#15803d';
-            ctx.fillRect(horizontalX, grassBaseY, 40, 40);
-        }
-
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
-        ctx.fillRect(0, grassBaseY, canvas.width, 3);
+    function render() {
+        ctx.fillStyle = '#3b82f6'; ctx.fillRect(0,0,500,530);
+        ctx.fillStyle = '#16a34a'; ctx.fillRect(0, 490, 500, 40);
+        posts.forEach(p => { ctx.fillStyle = '#fff'; ctx.fillRect(p.x, 0, 55, p.topHeight); ctx.fillRect(p.x, p.bottomY, 55, 530); });
+        if (keeper.active) { ctx.fillStyle = '#e11d48'; ctx.fillRect(keeper.x, keeper.y, 30, 40); }
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(ball.x, ball.y, 13, 0, Math.PI*2); ctx.fill();
     }
 
-    function renderActiveGraphicsLayers() {
-        renderStaticBackgroundScenery();
+    // --- EVENT LISTENERS ---
+    document.getElementById('btn-save-profile').onclick = () => {
+        let val = document.getElementById('username-field').value.toUpperCase();
+        if (val.length < 2) return alert("Enter a name!");
+        if (session.board.some(r => r.name === val)) alert('This name is already taken!');
+        else { session.player = val; localStorage.setItem('ft_user', val); popUI('layer-dashboard'); }
+    };
+    document.getElementById('opt-endless').onclick = () => { currentMode = 'endless'; setupMatchSession(); };
+    document.getElementById('opt-stages').onclick = () => popUI('layer-stages');
+    document.getElementById('btn-next-stage').onclick = () => { currentStage++; setupMatchSession(); };
+    document.getElementById('btn-rematch').onclick = setupMatchSession;
+    document.querySelectorAll('.btn-to-hub').forEach(b => b.onclick = () => popUI('layer-dashboard'));
+    document.querySelectorAll('.stage-node').forEach(b => b.onclick = (e) => { 
+        currentMode = 'stages'; 
+        currentStage = parseInt(e.target.dataset.stg); 
+        if(currentStage <= session.highestUnlocked) setupMatchSession();
+        else alert("Level locked!");
+    });
 
-        posts.forEach(p => {
-            let postColorGrad = ctx.createLinearGradient(p.x, 0, p.x + 55, 0);
-            postColorGrad.addColorStop(0, '#f1f5f9');
-            postColorGrad.addColorStop(0.4, '#ffffff');
-            postColorGrad.addColorStop(1, '#cbd5e1');
-
-            ctx.fillStyle = postColorGrad;
-            ctx.fillRect(p.x, 0, 55, p.topHeight);
-            ctx.fillStyle = '#93c5fd';
-            ctx.fillRect(p.x - 1, p.topHeight - 4, 57, 4); 
-
-            ctx.fillStyle = postColorGrad;
-            ctx.fillRect(p.x, p.bottomY, 55, canvas.height - p.bottomY - 40);
-            ctx.fillStyle = '#93c5fd';
-            ctx.fillRect(p.x - 1, p.bottomY, 57, 4); 
-        });
-
-        if (keeper.active) {
-            ctx.fillStyle = keeper.mode === 'still' ? '#e11d48' : '#ef4444'; // High vis red color for static block wall
-            ctx.fillRect(keeper.x, keeper.y, keeper.width, keeper.height);
-
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(keeper.x + 4, keeper.y, 4, keeper.height);
-            ctx.fillRect(keeper.x + keeper.width - 8, keeper.y, 4, keeper.height);
-
-            ctx.fillStyle = '#f59e0b';
-            ctx.fillRect(keeper.x - 3, keeper.y + 12, 3, 8);
-            ctx.fillRect(keeper.x + keeper.width, keeper.y + 12, 3, 8);
-        }
-
-        ctx.save();
-        ctx.translate(ball.x, ball.y);
-        ctx.rotate(ball.angle);
-
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(0, 0, ball.radius, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = '#334155';
-        ctx.lineWidth = 1.2;
-        for (let i = 0; i < 5; i++) {
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            let radialA = (Math.PI * 2 / 5) * i;
-            ctx.lineTo(Math.cos(radialA) * ball.radius, Math.sin(radialA) * ball.radius);
-            ctx.stroke();
-        }
-        ctx.restore();
-
-        particles.forEach(pt => {
-            ctx.save();
-            ctx.globalAlpha = pt.alpha;
-            ctx.fillStyle = pt.color;
-            ctx.beginPath();
-            ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-        });
-    }
-
-    initStadiumApp();
+    if(session.player) popUI('layer-dashboard');
 </script>
-
 </body>
 </html>
