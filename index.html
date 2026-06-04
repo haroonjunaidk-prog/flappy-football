@@ -1,19 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <html lang="en">
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>Flappy Football: Top Bins Edition - Play Free Arcade Game</title>
-    <meta name="description" content="Play Flappy Football: Top Bins Edition! Tap, jump, and dodge tough goalkeepers to score goals in this addictive, fast-paced arcade style sports game.">
-    <meta name="keywords" content="flappy football, top bins, arcade football game, browser soccer game, play flappy bird football">
+    <title>Play Flappy Football: Top Bins Edition - Free Arcade Browser Game</title>
+    <meta name="description" content="Play Flappy Football: Top Bins Edition! Face narrow goalposts, bypass stationary blockers, and conquer rapid goalkeepers in this addictive browser arcade game.">
+    <meta name="keywords" content="flappy football, top bins, arcade football game, browser soccer game, play flappy bird football, free online games">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://yourdomain.com/flappy-football" />
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flappy Football: Top Bins Edition</title>
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yourdomain.com/flappy-football">
+    <meta property="og:title" content="Flappy Football: Top Bins Edition">
+    <meta property="og:description" content="Test your timing against narrow gaps and adaptive goalkeepers. Play the game directly in your browser.">
+    <meta property="og:image" content="https://yourdomain.com/assets/game-preview.jpg">
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://yourdomain.com/flappy-football">
+    <meta property="twitter:title" content="Flappy Football: Top Bins Edition">
+    <meta property="twitter:description" content="Dodge the keeper and smash it into the top bins.">
+    <meta property="twitter:image" content="https://yourdomain.com/assets/game-preview.jpg">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "VideoGame",
+      "name": "Flappy Football: Top Bins Edition",
+      "description": "An addictive browser-based arcade sports game where players fly a football through narrow goalposts and dodge various goalkeeper defensive setups.",
+      "genre": ["Arcade Game", "Sports Game"],
+      "playMode": "SinglePlayer",
+      "applicationCategory": "Game",
+      "operatingSystem": "Windows, macOS, Android, iOS",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+
     <style>
         :root {
             --stadium-blue: #3b82f6;
@@ -60,7 +86,6 @@
             z-index: 1;
         }
 
-        /* Frosted Glass UI Overlay - Preserves the vibrant stadium sky backdrop */
         .ui-layer {
             position: absolute;
             top: 0;
@@ -104,7 +129,6 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        /* Dashboard Menu Grid Layout */
         .menu-grid {
             display: grid;
             grid-template-columns: 1.10fr 0.90fr;
@@ -137,7 +161,6 @@
         .option-card h3 { font-size: 1.1rem; margin-bottom: 2px; }
         .option-card p { font-size: 0.8rem; color: #f1f5f9; }
 
-        /* Leaderboard Box styling */
         .leaderboard-container {
             background: rgba(15, 23, 42, 0.4);
             border: 2px solid rgba(255, 255, 255, 0.2);
@@ -172,7 +195,6 @@
             background: rgba(59, 130, 246, 0.4);
         }
 
-        /* Profile Selection Field */
         #username-field {
             background: rgba(15, 23, 42, 0.6);
             border: 2px solid rgba(255, 255, 255, 0.3);
@@ -187,7 +209,6 @@
         }
         #username-field:focus { border-color: #ffffff; }
 
-        /* Stage Mode Selection Nodes */
         .stages-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -214,7 +235,6 @@
         .stage-node h4 { font-size: 1.2rem; }
         .stage-node span { font-size: 0.75rem; color: #fcd34d; font-weight: bold; }
 
-        /* HUD Overlay Display */
         #game-hud {
             position: absolute;
             top: 15px;
@@ -327,7 +347,6 @@
 </div>
 
 <script>
-    // --- STORAGE STATE REGISTRY & BOT RECORDS ---
     const MOCK_BOARD = [
         { name: "🐐 MESSI BOT", score: 15, system: true },
         { name: "🤖 RONALDO BOT", score: 12, system: true },
@@ -347,15 +366,14 @@
     const ctx = canvas.getContext('2d');
     const gameBox = document.getElementById('game-box');
 
-    // Engine Core System Balancers
     const BALANCER = {
         gravity: 0.22,
         jumpForce: -5.5,
         forwardSpeed: 2.4,
         spacing: 220,
-        gapSize: 165,
+        gapSize: 125, // HARDCORE TUNNEL SIZE TUNED DOWN FROM 165
         ballSize: 13,
-        cushion: 3.5 // Continuous hitbox tolerance margin to eliminate frame glitches
+        cushion: 3.5 
     };
 
     let animationFrameId = null;
@@ -363,17 +381,14 @@
     let currentMode = 'endless'; 
     let currentStage = 1;
 
-    // Entity Model Metrics
     let ball = {};
     let posts = [];
     let keeper = {};
     let score = 0;
     let particles = [];
 
-    // --- BOOT AND ROUTING MANAGEMENT ---
     function initStadiumApp() {
         renderStaticBackgroundScenery();
-        
         if (!session.player) {
             popUI('layer-username');
         } else {
@@ -381,16 +396,27 @@
         }
     }
 
+    // UNIQUE PROFILE CLONING PREVENTION BLOCK
     document.getElementById('btn-save-profile').addEventListener('click', (e) => {
         e.stopPropagation();
-        let input = document.getElementById('username-field').value.trim();
-        if (input.length >= 2) {
-            session.player = input.toUpperCase();
-            localStorage.setItem('ft_user', session.player);
-            loadDashboardHub();
-        } else {
+        let input = document.getElementById('username-field').value.trim().toUpperCase();
+        
+        if (input.length < 2) {
             alert('Enter a valid striker profile name (min 2 characters).');
+            return;
         }
+
+        // Search registry database to protect identity strings
+        let nameExists = session.board.some(record => record.name === input);
+
+        if (nameExists) {
+            alert('This name is already taken!');
+            return;
+        }
+
+        session.player = input;
+        localStorage.setItem('ft_user', session.player);
+        loadDashboardHub();
     });
 
     function popUI(uiId) {
@@ -422,7 +448,6 @@
         });
     }
 
-    // --- NAVIGATION CONTROLLER ACTION INTERFACES ---
     document.getElementById('opt-endless').addEventListener('click', (e) => {
         e.stopPropagation();
         currentMode = 'endless';
@@ -460,7 +485,6 @@
         setupMatchSession();
     });
 
-    // --- ENGINE CONTROL LOOPS & GLOBALIZED DUAL CONTROLS ---
     function setupMatchSession() {
         popUI(null); 
         document.getElementById('game-hud').classList.remove('hidden');
@@ -479,7 +503,7 @@
         keeper = {
             x: 0, y: 150,
             width: 32, height: 50,
-            speed: 1.8, direction: 1,
+            speed: 2.6, direction: 1,
             active: false, mode: 'none'
         };
 
@@ -492,7 +516,6 @@
         animationFrameId = requestAnimationFrame(engineProcessingCore);
     }
 
-    // COMPLETE KEYBOARD MAPPING RESTORATION
     window.removeEventListener('keydown', executeGlobalJumpAction);
     window.addEventListener('keydown', executeGlobalJumpAction);
 
@@ -503,7 +526,6 @@
     gameBox.addEventListener('touchstart', executeTouchJumpAction, { passive: false });
 
     function executeGlobalJumpAction(e) {
-        // Explicitly list all valid layout options: Space, KeyA, or Any Arrow key configurations
         const isArrowKey = e.key.startsWith('Arrow');
         const isAKey = e.code === 'KeyA' || e.key === 'a' || e.key === 'A';
         const isSpaceKey = e.code === 'Space';
@@ -545,9 +567,9 @@
         let label = document.getElementById('hud-phase');
 
         if (currentMode === 'endless') {
-            if (score <= 10) label.innerHTML = `<span style="color:#22c55e">Phase 1: Warm-Up</span>`;
-            else if (score <= 20) label.innerHTML = `<span style="color:#3b82f6">Phase 2: Patrol</span>`;
-            else label.innerHTML = `<span style="color:#ef4444">Phase 3: Deep Box</span>`;
+            if (score <= 10) label.innerHTML = `<span style="color:#22c55e">Phase 1: Deep Tunnel</span>`;
+            else if (score <= 20) label.innerHTML = `<span style="color:#3b82f6">Phase 2: Block Wall</span>`;
+            else label.innerHTML = `<span style="color:#ef4444">Phase 3: Rapid Box</span>`;
         } else {
             let target = currentStage === 1 ? 10 : currentStage === 2 ? 15 : 20;
             label.innerHTML = `<span style="color:#fcd34d">Stage ${currentStage} (Target: ${target})</span>`;
@@ -563,7 +585,6 @@
         animationFrameId = requestAnimationFrame(engineProcessingCore);
     }
 
-    // --- GAME ENGINE PHYSICS & INTELLIGENT KEEPER NERF BALANCE ---
     function updateEntitiesLogic() {
         ball.velocity += BALANCER.gravity;
         ball.y += ball.velocity;
@@ -579,13 +600,14 @@
         evaluateGoalkeeperAIBehavior(nearestPost);
 
         if (keeper.active) {
-            if (keeper.mode === 'tracking') {
-                let deltaY = ball.y - keeper.y - (keeper.height / 2);
-                keeper.y += Math.sign(deltaY) * Math.min(Math.abs(deltaY), 0.95); 
-                
-                if (keeper.y < 10) keeper.y = 10;
-                if (keeper.y + keeper.height > canvas.height - 48) keeper.y = canvas.height - 48 - keeper.height;
+            if (keeper.mode === 'still') {
+                // FIXED STATIONARY LOGIC FOR PHASE 2
+                if (nearestPost) {
+                    keeper.x = nearestPost.x + 12;
+                    keeper.y = nearestPost.topHeight + (BALANCER.gapSize / 2) - (keeper.height / 2);
+                }
             } else if (keeper.mode === 'vertical') {
+                // UNCHANGED UNTOUCHED PHASE 3 PATROL PATTERN
                 keeper.y += keeper.speed * keeper.direction;
                 if (nearestPost) {
                     if (keeper.y < nearestPost.topHeight + 3 || keeper.y + keeper.height > nearestPost.bottomY - 3) {
@@ -655,8 +677,7 @@
                 keeper.active = false;
             } else if (score <= 20) {
                 keeper.active = true;
-                keeper.mode = 'tracking';
-                keeper.x = nearestPost.x - 110; 
+                keeper.mode = 'still';
             } else {
                 keeper.active = true;
                 if (keeper.mode !== 'vertical') {
@@ -671,8 +692,7 @@
                 keeper.active = false;
             } else if (currentStage === 2) {
                 keeper.active = true;
-                keeper.mode = 'tracking';
-                keeper.x = nearestPost.x - 110; 
+                keeper.mode = 'still';
             } else {
                 keeper.active = true;
                 if (keeper.mode !== 'vertical') {
@@ -755,7 +775,6 @@
         return tracking;
     }
 
-    // --- CLASSIC VISUAL RENDERING SCENERY SYSTEMS ---
     function renderStaticBackgroundScenery() {
         let skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
         skyGradient.addColorStop(0, '#1d4ed8');   
@@ -777,7 +796,6 @@
     function renderActiveGraphicsLayers() {
         renderStaticBackgroundScenery();
 
-        // 1. Draw Moving Structural White Goalposts (Pipes)
         posts.forEach(p => {
             let postColorGrad = ctx.createLinearGradient(p.x, 0, p.x + 55, 0);
             postColorGrad.addColorStop(0, '#f1f5f9');
@@ -795,9 +813,8 @@
             ctx.fillRect(p.x - 1, p.bottomY, 57, 4); 
         });
 
-        // 2. Draw Active Goalkeeper Kits
         if (keeper.active) {
-            ctx.fillStyle = keeper.mode === 'tracking' ? '#06b6d4' : '#ef4444';
+            ctx.fillStyle = keeper.mode === 'still' ? '#e11d48' : '#ef4444'; // High vis red color for static block wall
             ctx.fillRect(keeper.x, keeper.y, keeper.width, keeper.height);
 
             ctx.fillStyle = '#ffffff';
@@ -809,7 +826,6 @@
             ctx.fillRect(keeper.x + keeper.width, keeper.y + 12, 3, 8);
         }
 
-        // 3. Draw High-Contrast Classic Match Soccer Ball
         ctx.save();
         ctx.translate(ball.x, ball.y);
         ctx.rotate(ball.angle);
@@ -830,7 +846,6 @@
         }
         ctx.restore();
 
-        // 4. Render Active Goal Blast Particles
         particles.forEach(pt => {
             ctx.save();
             ctx.globalAlpha = pt.alpha;
